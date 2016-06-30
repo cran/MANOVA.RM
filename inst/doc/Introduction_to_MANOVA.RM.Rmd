@@ -1,0 +1,169 @@
+<!--
+%\VignetteEngine{knitr::rmarkdown}
+%\VignetteIndexEntry{An Introduction to MANOVA.RM}
+-->
+
+
+## Introduction
+
+This vignette documents the use of the `MANOVA.RM` package for the analysis of semi-parametric repeated measures designs and multivariate data. 
+The package consists of two important functions, which will be explained in detail below. Both functions calculate the Wald-type statistic 
+(WTS) and the ANOVA-type statistic (ATS) based on means. Furthermore, different resampling approaches are provided in order to improve the
+small sample behavior of the WTS. These test statistics can be used for arbitrary semi-parametric designs, even with unequal covariance matrices among groups
+and small sample sizes.
+
+## The `RM` function
+
+The `RM` function calculates the above mentioned test statistics in a repeated measures design with an arbitrary number of crossed whole-plot and 
+sub-plot factors.
+The resampling methods provided are a permutation procedure, a parametric bootstrap approach and a
+wild bootstrap using Rademacher weights. The wild bootstrap is also implemented for the ATS.
+
+
+### Data Example 1 (One whole-plot and two sub-plot factors)
+
+For illustration purposes, we consider the data set `o2cons`, which is included in `MANOVA.RM`. 
+
+```{r}
+library(MANOVA.RM)
+data(o2cons)
+```
+
+The data set contains measurements of the oxygen consumption of leukocytes in the presence and absence of inactivated staphylococci 
+at three consecutive time points. 
+Due to the study design, both time and staphylococci are sub-plot factors while the treatment (Verum vs. Placebo) is a whole-plot
+factor.
+
+```{r}
+head(o2cons)
+```
+
+We will now analyze this data using the `RM` function.
+The `RM` function takes as arguments:
+* `formula`: A formula consisting of the outcome variable on the left hand side of a \~ operator and the factor
+variables of interest on the right hand side. An interaction term must be specified.
+* `data`: A data.frame, list or environment containing the variables in `formula`.
+* `subject`: The column name of the subjects variable in the data frame.
+* `no.subf`: The number of sub-plot factors, default is 1.
+* `iter`: The number of iterations for the resampling approach. Default value is 10000.
+* `alpha`: The significance level, default is 0.05.
+* `resampling`: The resampling method, one of 'Perm', 'paramBS' or 'WildBS'. Default is
+set to 'Perm'.
+
+
+```{r}
+set.seed(1234)
+model1 <- RM(O2 ~ Group * Staphylococci * Time, data = o2cons, 
+             subject = "Subject", no.subf = 2, iter = 10000, resampling = "Perm", CPU = 1)
+summary(model1)
+```
+
+The output consists of four parts: `model1$Descriptive` gives an overview of the descriptive statistics: The number of observations, 
+mean and confidence intervals (based on quantiles of the t-distribution) are displayed for each factor level combination.
+`model1$WTS` contains the results for the Wald-type test: The test statistic, degree of freedom and p-values based on the asymptotic $\chi^2$ distribution
+are displayed. Note that the $\chi^2$ approximation is very liberal for small sample sizes.
+`model1$ATS` contains the corresponding results based on the ATS. 
+This test statistic tends to rather
+conservative decisions in the case of small sample sizes and is even asymptotically only an approximation, thus not providing an asymptotic level $\alpha$ test.
+Finally, `model1$resampling` contains the p-values based on 
+the chosen resampling approach. For the ATS, only the wild bootstrap procedure can be applied.
+Due to the above mentioned issues for small sample sizes, the resampling procedure is recommended for such situations.
+
+### Data Example 2 (Two sub-plot and two whole-plot factors)
+
+We consider the data set `EEG` from the `MANOVA.RM` package: At the Department of Neurology, University Clinic of Salzburg, 160 patients were diagnosed
+with either AD, MCI, or SCC, based on neuropsychological diagnostics (Bathke et al.(2015), preprint). This data set contains z-scores for 
+brain rate and Hjorth complexity,
+each measured at frontal, temporal and central electrode positions and averaged across hemispheres. In addition to standardization, complexity
+values were multiplied by -1 in order to make them more easily comparable to brain rate
+values: For brain rate we know that the values decrease with age and pathology, while
+Hjorth complexity values are known to increase with age and pathology.
+The three between-subjects factors considered were sex (men vs. women), diagnosis (AD
+vs. MCI vs. SCC), and age ($< 70$ vs. $>= 70$ years). Additionally, the within-subjects factors region (frontal, temporal, central) and 
+feature (brain rate, complexity) structure the response vector.
+
+```{r}
+data(EEG)
+set.seed(987)
+EEG_model <- RM(resp ~ sex * diagnosis * feature * region, 
+                     data = EEG, subject = "id", no.subf = 2, resampling = "WildBS",
+                     iter = 1000,  alpha = 0.01, CPU = 1)
+summary(EEG_model)
+```
+
+We find significant effects at level $\alpha = 0.01$ of the whole-plot factors sex and diagnosis, while none of the sub-plot factors or interactions become significant.
+
+### Plotting
+
+The `RM()` function is equipped with a plotting option, displaying the calculated means along with $(1-\alpha)$ confidence intervals.
+The `plot` function takes an `RM` object as an argument. In addition, the factor of interest may be specified. If this argument is 
+omitted in a two- or higher-way layout, the user is asked to specify the factor for plotting. Furthermore, additional graphical parameters
+can be used to customize the plots. The optional argument `legendpos` specifies the position of the legend in higher-way layouts.
+
+```{r}
+plot(EEG_model, factor = "sex", main = "Effect of sex on EEG values")
+plot(EEG_model, factor = "sex:diagnosis", legendpos = "topleft", col = c(4, 2))
+plot(EEG_model, factor = "sex:diagnosis:feature", legendpos = "center")
+```
+
+
+
+## The `MANOVA` function
+
+The `MANOVA` function calculates the above mentioned test statistics for multivariate data in a design with crossed or nested factors.
+The resampling methods provided are a parametric bootstrap approach and a
+wild bootstrap using Rademacher weights. The wild bootstrap is also implemented for the ATS, while the parametric approach works only for the WTS,
+see Konietschke et al. (2015) for details. 
+Note that only balanced nested designs (i.e., the same number of factor levels $b$ for each level of the factor $A$) with up to three factors are 
+implemented. Designs involving both crossed and nested factors are not implemented.
+
+
+### Data Example MANOVA (two crossed factors)
+
+We again consider the data set `EEG` from the `MANOVA.RM` package, but now we ignore the sub-plot factor structure. Therefore, we are
+now in a multivariate setting with 6 measurements per patient and three crossed factors sex, age and diagnosis. Due to the small number of subjects in
+some groups (e.g., only 2 male patients aged $<$ 70 were diagnosed with AD) we restrict our analyses to two factors at a time.
+The analysis of this example is shown below.
+
+The `MANOVA` function takes as arguments:
+* `formula`: A formula consisting of the outcome variable on the left hand side of a \~ operator and the factor
+variables of interest on the right hand side. An interaction term must be specified.
+* `data`: A data.frame, list or environment containing the variables in `formula`.
+* `subject`: The column name of the subjects variable in the data frame.
+* `iter`: The number of iterations for the resampling procedure. Default value is 10000.
+* `alpha`: The significance level, default is 0.05.
+* `resampling`: The resampling method, one of 'paramBS' and 'WildBS'. Default is
+set to 'paramBS'.
+
+
+```{r}
+data(EEG)
+set.seed(987)
+EEG_MANOVA <- MANOVA(resp ~ sex * diagnosis, 
+                     data = EEG, subject = "id", resampling = "paramBS", 
+                     iter = 1000,  alpha = 0.01, CPU = 1)
+summary(EEG_MANOVA)
+```
+
+
+
+## optional GUI
+
+The `MANOVA.RM` package is equipped with an optional graphical user interface, which is based on `RGtk2`. The GUI may be started in `R` (if `RGtk2` is installed) using the
+command `GUI.RM()` and `GUI.MANOVA()` for repeated measures designs and multivariate data, respectively. 
+
+```{r}
+GUI.MANOVA()
+```
+
+The user can specify the data location
+(either directly or via the "load data" button), the formula, the number of iterations for the resampling approach and
+the significance level. Furthermore, one needs to specify the number of sub-plot factors (for the repeated measures design only),
+the 'subject' variable in the 
+data frame and the resampling method.
+Additionally, one can specify whether or not headers are
+included in the data file, and which separator (e.g., ',' for *.csv files) and character symbols are used for decimals
+in the data file. 
+The GUI for `RM` also provides a plotting option, which generates a new window
+for specifying the factors to be plotted (in higher-way layouts) along with a few plotting
+parameters.
