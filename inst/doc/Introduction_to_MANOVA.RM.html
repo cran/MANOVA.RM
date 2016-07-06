@@ -470,19 +470,19 @@ summary(EEG_model)
 ##                              WildBS (WTS) WildBS (ATS)
 ## sex                                 0.000        0.000
 ## diagnosis                           0.000        0.000
-## sex:diagnosis                       0.141        0.152
-## feature                             0.779        0.779
-## sex:feature                         0.138        0.138
-## diagnosis:feature                   0.059        0.233
-## sex:diagnosis:feature               0.470        0.378
-## region                              0.973        0.987
-## sex:region                          0.680        0.716
-## diagnosis:region                    0.155        0.332
-## sex:diagnosis:region                0.851        0.796
-## feature:region                      0.820        0.939
-## sex:feature:region                  0.888        0.951
-## diagnosis:feature:region            0.110        0.535
-## sex:diagnosis:feature:region        0.767        0.683
+## sex:diagnosis                       0.128        0.116
+## feature                             0.778        0.778
+## sex:feature                         0.168        0.168
+## diagnosis:feature                   0.061        0.250
+## sex:diagnosis:feature               0.445        0.366
+## region                              0.976        0.985
+## sex:region                          0.688        0.723
+## diagnosis:region                    0.181        0.308
+## sex:diagnosis:region                0.871        0.819
+## feature:region                      0.811        0.921
+## sex:feature:region                  0.886        0.955
+## diagnosis:feature:region            0.129        0.522
+## sex:diagnosis:feature:region        0.747        0.636
 </code></pre>
 
 <p>We find significant effects at level \(\alpha = 0.01\) of the whole-plot factors sex and diagnosis, while none of the sub-plot factors or interactions become significant.</p>
@@ -567,21 +567,21 @@ summary(EEG_MANOVA)
 ## 
 ## Wald-Type Statistic (WTS):
 ##               Test statistic df      p-value
-## sex                 210.3879  6 0.000000e+00
-## diagnosis           746.6521 12 0.000000e+00
-## sex:diagnosis       100.4759 12 4.440892e-16
+## sex                12.604176  6 4.977046e-02
+## diagnosis          55.158000 12 1.695621e-07
+## sex:diagnosis       9.790162 12 6.343637e-01
 ## 
 ## ANOVA-Type Statistic (ATS):
 ##               Test statistic      df1 df2      p-value
-## sex                11.781298 4.006023 Inf 1.399661e-09
-## diagnosis          15.461981 4.917992 Inf 4.996004e-15
-## sex:diagnosis       2.468292 4.917992 Inf 3.124514e-02
+## sex                 7.333559 1.796816 Inf 1.047708e-03
+## diagnosis           9.624691 2.323563 Inf 2.244646e-05
+## sex:diagnosis       1.536449 2.323563 Inf 2.116279e-01
 ## 
 ## p-values resampling:
 ##               paramBS (WTS) paramBS (ATS)
-## sex                   0.000            NA
-## diagnosis             0.000            NA
-## sex:diagnosis         0.004            NA
+## sex                   0.122            NA
+## diagnosis             0.001            NA
+## sex:diagnosis         0.753            NA
 </code></pre>
 
 <h2>optional GUI</h2>

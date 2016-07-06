@@ -76,16 +76,16 @@ RM.Stat<- function(data, nind, n, hypo_matrix, iter, alpha, iii, hypo_counter, n
   PBS <- function(i, ...){
     # calculate mvrnorm for each group
     XP <- list()
+    meansP <- list()
     for (i in 1:n.groups){
-      XP[[i]] <- MASS::mvrnorm(nind[i], rep(0, n.sub), V[[i]])
+      XP[[i]] <- MASS::mvrnorm(nind[i], mu = rep(0, n.sub), Sigma = n[i]*V[[i]])
+      meansP[[i]] <- colMeans(XP[[i]])
     }
-    xperm <- c(unlist(XP))
-    meansP <- A %*% xperm
+    meansP <- unlist(meansP)
     
     VP <- list(NA)
     for(i in 1:n.groups){
-      yperm <- matrix(xperm[(n.temp[i]+1):n.temp[i+1]], ncol = n.sub)
-      VP[[i]] <- 1 / nind[i] * cov(yperm)
+      VP[[i]] <- 1 / n[i] * cov(XP[[i]])
     }
     
     sigma_hatP <- VP[[1]]

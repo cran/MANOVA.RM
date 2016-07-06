@@ -212,7 +212,6 @@ MANOVA <- function(formula, data, subject,
 
     if (length(fac_names) == nf) {
       # nested
-      TYPE <- "nested"
       hypo_matrices <- HN_MANOVA(fl, p)
       # create correct level combinations
       blev <- list()
@@ -244,7 +243,6 @@ MANOVA <- function(formula, data, subject,
     }
     } else {
       # crossed
-      TYPE <- "crossed"
       hypo_matrices <- HC_MANOVA(fl, perm_names, fac_names, p)[[1]]
       fac_names <- HC_MANOVA(fl, perm_names, fac_names, p)[[2]]
     }

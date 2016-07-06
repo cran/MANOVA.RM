@@ -18,7 +18,7 @@ MANOVA.Stat<- function(data, n, hypo_matrix, iter, alpha, resampling, n.groups, 
   V <- list(NA)
   n.temp <- cumsum(c(0, n))
   for (i in 1:n.groups){
-    y <- matrix(x[(n.temp[i]*p+1):(n.temp[i+1]*p)], ncol = p)
+    y <- matrix(x[(n.temp[i]*p+1):(n.temp[i+1]*p)], ncol = p, byrow = TRUE)
     V[[i]] <- 1 / n[i] * cov(y)
   }
   
@@ -47,16 +47,16 @@ MANOVA.Stat<- function(data, n, hypo_matrix, iter, alpha, resampling, n.groups, 
   PBS <- function(i, ...){
     # calculate mvrnorm for each group
     XP <- list()
+    meansP <- list()
     for (i in 1:n.groups){
-      XP[[i]] <- MASS::mvrnorm(n[i], rep(0, p), V[[i]])
+      XP[[i]] <- MASS::mvrnorm(n[i], mu = rep(0, p), Sigma = n[i]*V[[i]])
+      meansP[[i]] <- colMeans(XP[[i]])
     }
-    xperm <- c(unlist(XP))
-    meansP <- A %*% xperm
+    meansP <- unlist(meansP)
     
-    VP <- list(NA)
+    VP <- list()
     for(i in 1:n.groups){
-      yperm <- matrix(xperm[(n.temp[i]*p+1):(n.temp[i+1]*p)], ncol = p)
-      VP[[i]] <- 1 / n[i] * cov(yperm)
+      VP[[i]] <- 1 / n[i] * cov(XP[[i]])
     }
     
     sigma_hatP <- VP[[1]]
@@ -76,12 +76,11 @@ MANOVA.Stat<- function(data, n, hypo_matrix, iter, alpha, resampling, n.groups, 
     VP <- list(NA)
     xperm <- list(NA)
     for (i in 1:n.groups){
-      y <- matrix(x[(n.temp[i]*p+1):(n.temp[i+1]*p)], ncol = p)
+      y <- matrix(x[(n.temp[i]*p+1):(n.temp[i+1]*p)], ncol = p, byrow = TRUE)
       means2 <- rep(colMeans(y), n[i])
       epsi <- 2*rbinom(n[i], 1, 1/2)-1
-      xperm[[i]] <- rep(epsi, p)*(x[(n.temp[i]+1):n.temp[i+1]]-means2)
-      yperm <- matrix(unlist(xperm[[i]])[(n.temp[i]*p+1):(n.temp[i+1]*p)], ncol = p)
-      VP[[i]] <- 1 / n[i] * cov(yperm)
+      xperm[[i]] <- rep(epsi, p)*(y -means2)
+      VP[[i]] <- 1 / n[i] * cov(xperm[[i]])
     }
     
     sigma_hatP <- VP[[1]]
