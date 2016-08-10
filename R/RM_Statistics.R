@@ -78,14 +78,14 @@ RM.Stat<- function(data, nind, n, hypo_matrix, iter, alpha, iii, hypo_counter, n
     XP <- list()
     meansP <- list()
     for (i in 1:n.groups){
-      XP[[i]] <- MASS::mvrnorm(nind[i], mu = rep(0, n.sub), Sigma = n[i]*V[[i]])
+      XP[[i]] <- MASS::mvrnorm(nind[i], mu = rep(0, n.sub), Sigma = nind[i]*V[[i]])
       meansP[[i]] <- colMeans(XP[[i]])
     }
     meansP <- unlist(meansP)
     
     VP <- list(NA)
     for(i in 1:n.groups){
-      VP[[i]] <- 1 / n[i] * cov(XP[[i]])
+      VP[[i]] <- 1 / nind[i] * cov(XP[[i]])
     }
     
     sigma_hatP <- VP[[1]]
@@ -96,6 +96,7 @@ RM.Stat<- function(data, nind, n, hypo_matrix, iter, alpha, iii, hypo_counter, n
     
     TP <- t(H) %*% MASS::ginv(H %*% SnP %*% t(H)) %*% H
     WTPS <- diag(N * t(meansP) %*% TP %*% meansP)
+    return(WTPS)
   }
   
   #---------------------------------- Wild bootstrap ---------------------------------#
