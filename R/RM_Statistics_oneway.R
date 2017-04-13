@@ -1,5 +1,5 @@
 ## function for calculating test statistics, permutation etc for repeated measures with only time as factor
-RM.Stat.oneway<- function(data, n, t, hypo_matrix, iter, alpha, resampling){
+RM.Stat.oneway<- function(data, n, t, hypo_matrix, iter, alpha, resampling, seed){
   
   N <- n[1]
   H <- hypo_matrix
@@ -39,6 +39,8 @@ RM.Stat.oneway<- function(data, n, t, hypo_matrix, iter, alpha, resampling){
     }
     
     #---------------------Wald-Type for permuted data ------------------------------#
+    if(seed != 0){
+    set.seed(seed)}
     WTPS <- sapply(1:iter, function(arg){
       xperm <- x[Perm[, arg]]
       meansP <- A %*% xperm
@@ -52,6 +54,8 @@ RM.Stat.oneway<- function(data, n, t, hypo_matrix, iter, alpha, resampling){
     p_valueWTPS <- 1-ecdf_WTPS(WTS)
     p_valueATS_res <- NA
   } else if(resampling == "paramBS"){
+    if(seed != 0){
+      set.seed(seed)}
     #--------------------------------- parametric bootstrap ---------------------------#
     WTPS <- sapply(1:iter, function(i, ...){
       xperm <- c(mvrnorm(N, rep(0, t), Sn))
@@ -66,6 +70,8 @@ RM.Stat.oneway<- function(data, n, t, hypo_matrix, iter, alpha, resampling){
     p_valueWTPS <- 1-ecdf_WTPS(WTS)    
     p_valueATS_res <- NA
   } else if(resampling == "WildBS"){
+    if(seed != 0){
+      set.seed(seed)}
     #---------------------------------- Wild bootstrap ---------------------------------#
     WTPS <- sapply(1:iter, function(i, ...){
       means2 <- rep(means, n)

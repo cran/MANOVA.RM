@@ -1,4 +1,4 @@
-#' A graphical user interface for the MANOVA() funtion
+#' A graphical user interface for the MANOVA() function
 #' 
 #' This function provides a graphical user interface for calculating statistical
 #' tests for multivariate data.

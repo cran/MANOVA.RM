@@ -1,5 +1,5 @@
 ## function for calculating test statistics, permutation etc for repeated measures with only sub-plot factors involved
-RM.Stat.sub<- function(data, nind, n, hypo_matrix, iter, alpha, n.sub, n.groups, resampling){
+RM.Stat.sub<- function(data, nind, n, hypo_matrix, iter, alpha, n.sub, n.groups, resampling, seed){
   
 N <- nind
 H <- hypo_matrix
@@ -40,6 +40,8 @@ if(resampling == "Perm"){
     Perm[, pp] <- sample(1:(N * n.sub.total))
   }
   
+  if(seed != 0){
+    set.seed(seed)}
   #---------------------Wald-Type for permuted data ------------------------------#
   WTPS <- sapply(1:iter, function(arg){
     xperm <- x[Perm[, arg]]
@@ -53,6 +55,8 @@ if(resampling == "Perm"){
   p_valueWTPS <- 1-ecdf_WTPS(WTS)
   p_valueATS_res <- NA
 } else if(resampling == "paramBS"){
+  if(seed != 0){
+    set.seed(seed)}
   #--------------------------------- parametric bootstrap ---------------------------#
   WTPS <- sapply(1:iter, function(i, ...){
     xperm <- c(mvrnorm(N, rep(0, n.sub.total), Sn))
@@ -67,6 +71,8 @@ if(resampling == "Perm"){
   p_valueWTPS <- 1-ecdf_WTPS(WTS)    
   p_valueATS_res <- NA
 } else if(resampling == "WildBS"){
+  if(seed != 0){
+    set.seed(seed)}
   #---------------------------------- Wild bootstrap ---------------------------------#
   WTPS <- sapply(1:iter, function(i, ...){
     means2 <- rep(means, N)

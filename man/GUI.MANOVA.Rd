@@ -2,7 +2,7 @@
 % Please edit documentation in R/GUI_MANOVA.R
 \name{GUI.MANOVA}
 \alias{GUI.MANOVA}
-\title{A graphical user interface for the MANOVA() funtion}
+\title{A graphical user interface for the MANOVA() function}
 \usage{
 GUI.MANOVA()
 }

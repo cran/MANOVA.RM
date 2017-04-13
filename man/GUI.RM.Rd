@@ -17,7 +17,7 @@ number of resampling iterations (default: 10,000) and the significance level alp
 (default: 0.05) need to be specified. Furthermore, the number of sub-plot factors
 and the column name specifying the subjects in the
 data need to be provided.
-For the resampling methods, the user can choose between a permutation approach (Friedrich et al. (2016)), a 
+For the resampling methods, the user can choose between a permutation approach (Friedrich et al. (2017)), a 
 parametric bootstrap approach (Konietschke et al. (2015)) and a Wild bootstrap using Rademacher weights
 (Bathke et al. (2016)).
 If the plot option is chosen, an additional window opens containing information on the plots.

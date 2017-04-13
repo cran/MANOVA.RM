@@ -5,7 +5,7 @@
 \title{Tests for Repeated Measures in Semi-Parametric Factorial Designs}
 \usage{
 RM(formula, data, subject, no.subf = 1, iter = 10000, alpha = 0.05,
-  resampling = "Perm", CPU)
+  resampling = "Perm", CPU, seed)
 }
 \arguments{
 \item{formula}{A model \code{\link{formula}} object. The left hand side
@@ -14,14 +14,14 @@ variables of interest. An interaction term must be specified. The time variable
 must be the last factor in the formula.}
 
 \item{data}{A data.frame, list or environment containing the variables in 
-\code{formula}.}
+\code{formula}. Data must be in long format.}
 
-\item{subject}{the column name of the subjects in the data.}
+\item{subject}{The column name of the subjects in the data.}
 
-\item{no.subf}{the number of sub-plot factors in the data, default is 1.}
+\item{no.subf}{The number of sub-plot factors in the data, default is 1.}
 
 \item{iter}{The number of iterations used for calculating the resampled 
-statistic. The default option is 10000.}
+statistic. The default option is 10,000.}
 
 \item{alpha}{A number specifying the significance level; the default is 0.05.}
 
@@ -32,6 +32,9 @@ to the WTS only.}
 
 \item{CPU}{The number of cores used for parallel computing. If omitted, cores are
 detected via \code{\link[parallel]{detectCores}}.}
+
+\item{seed}{A random seed for the resampling procedure. If omitted, no 
+reproducible seed is set.}
 }
 \value{
 An \code{RM} object containing the following components:
@@ -43,17 +46,17 @@ An \code{RM} object containing the following components:
  \item{WTS}{The value of the WTS along with degrees of freedom of the central chi-square distribution and 
   corresponding p-value.}
  \item{ATS}{The value of the ATS, degrees of freedom of the central F distribution and the corresponding p-value.}
- \item{resampling}{p-values for the test statistic based on the chosen resampling approach.}
+ \item{resampling}{p-values for the test statistics based on the chosen resampling approach.}
 }
 \description{
-The RM function calculates the Wald-type statistic (WTS), the ANOVA-type 
+The RM() function calculates the Wald-type statistic (WTS), the ANOVA-type 
 statistic (ATS) as well as resampling versions of these test statistics for 
 semi-parametric repeated measures designs.
 }
 \details{
 The RM() function provides the Wald-type
  statistic as well as the ANOVA-type statistic for repeated measures designs
- with metric data as described in Friedrich et al. (2016).
+ with metric data as described in Friedrich et al. (2017).
  These are even applicable for non-normal error terms and/or heteroscedastic
  variances. It is implemented for designs with an arbitrary number of whole-plot and sub-plot
  factors and allows for different sample sizes. In addition to the
@@ -69,7 +72,8 @@ plot(oxy, factor = "Group")
 
 }
 \references{
-Friedrich, S, Brunner, E and Pauly, M (2016). Permuting longitudinal data despite all the dependencies. arXiv preprint arXiv:1509.05570v2
+Friedrich, S., Brunner, E. and Pauly, M. (2017). Permuting longitudinal data
+ in spite of the dependencies. Journal of Multivariate Analysis, 153, 255-265.
 
  Bathke, A., Friedrich, S., Konietschke, F., Pauly, M., Staffen, W., Strobl, N. and Hoeller, Y. (2016). Using EEG, SPECT, and Multivariate Resampling Methods
 to Differentiate Between Alzheimer's and other Cognitive Impairments. arXiv preprint arXiv:1606.09004

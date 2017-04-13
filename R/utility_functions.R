@@ -46,9 +46,12 @@ print.MANOVA <- function(x, ...) {
   print(x$WTS)
   cat("\n", "ANOVA-Type Statistic (ATS):", "\n", sep = "")
   print(x$ATS)
+  cat("\n", "modified ANOVA-Type Statistic (MATS):", "\n", sep = "")
+  print(x$MATS)
   cat("\n", "p-values resampling:", "\n", sep = "")
   print(x$resampling)
 }
+
 
 #' @export
 summary.MANOVA <- function (object, ...) {
@@ -61,6 +64,8 @@ summary.MANOVA <- function (object, ...) {
   print(object$WTS)
   cat("\n", "ANOVA-Type Statistic (ATS):", "\n", sep = "")
   print(object$ATS)
+  cat("\n", "modified ANOVA-Type Statistic (MATS):", "\n", sep = "")
+  print(object$MATS)
   cat("\n", "p-values resampling:", "\n", sep = "")
   print(object$resampling)
 }

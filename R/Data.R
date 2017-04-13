@@ -13,7 +13,7 @@
 #' 
 #' @usage data(o2cons)
 #' 
-#' @source Friedrich, S, Brunner, E and Pauly, M (2016). Permuting longitudinal data despite all the dependencies. arXiv preprint arXiv:1509.05570v2
+#' @source Friedrich, S., Brunner, E. and Pauly, M. (2016). Permuting longitudinal data despite all the dependencies. arXiv preprint arXiv:1509.05570v2
 "o2cons"
 
 #' EEG Measurements in Patients with Alzheimer's Disease

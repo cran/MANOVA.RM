@@ -1,6 +1,6 @@
 #' Tests for Repeated Measures in Semi-Parametric Factorial Designs
 #' 
-#' The RM function calculates the Wald-type statistic (WTS), the ANOVA-type 
+#' The RM() function calculates the Wald-type statistic (WTS), the ANOVA-type 
 #' statistic (ATS) as well as resampling versions of these test statistics for 
 #' semi-parametric repeated measures designs.
 #' 
@@ -9,11 +9,11 @@
 #'   variables of interest. An interaction term must be specified. The time variable
 #'   must be the last factor in the formula.
 #' @param data A data.frame, list or environment containing the variables in 
-#'   \code{formula}.
-#' @param subject the column name of the subjects in the data.
-#' @param no.subf the number of sub-plot factors in the data, default is 1.
+#'   \code{formula}. Data must be in long format.
+#' @param subject The column name of the subjects in the data.
+#' @param no.subf The number of sub-plot factors in the data, default is 1.
 #' @param iter The number of iterations used for calculating the resampled 
-#'   statistic. The default option is 10000.
+#'   statistic. The default option is 10,000.
 #' @param alpha A number specifying the significance level; the default is 0.05.
 #' @param resampling The resampling method to be used, one of "Perm" (randomly permute 
 #'    all observations), "paramBS" (parametric bootstrap approach) and "WildBS" (wild bootstrap
@@ -21,10 +21,12 @@
 #'    to the WTS only.
 #' @param CPU The number of cores used for parallel computing. If omitted, cores are
 #'   detected via \code{\link[parallel]{detectCores}}.
+#' @param seed A random seed for the resampling procedure. If omitted, no 
+#'   reproducible seed is set.
 #'   
 #' @details The RM() function provides the Wald-type
 #'  statistic as well as the ANOVA-type statistic for repeated measures designs
-#'  with metric data as described in Friedrich et al. (2016).
+#'  with metric data as described in Friedrich et al. (2017).
 #'  These are even applicable for non-normal error terms and/or heteroscedastic
 #'  variances. It is implemented for designs with an arbitrary number of whole-plot and sub-plot
 #'  factors and allows for different sample sizes. In addition to the
@@ -40,7 +42,7 @@
 #'  \item{WTS}{The value of the WTS along with degrees of freedom of the central chi-square distribution and 
 #'   corresponding p-value.}
 #'  \item{ATS}{The value of the ATS, degrees of freedom of the central F distribution and the corresponding p-value.}
-#'  \item{resampling}{p-values for the test statistic based on the chosen resampling approach.}
+#'  \item{resampling}{p-values for the test statistics based on the chosen resampling approach.}
 #' 
 #' @examples data(o2cons)
 #' oxy <- RM(O2 ~ Group * Staphylococci * Time, data = o2cons, 
@@ -50,7 +52,8 @@
 #' 
 #' @seealso \code{\link[GFD]{GFD}}, \code{\link[nparLD]{nparLD}}, \code{\link{MANOVA}}
 #' 
-#' @references Friedrich, S, Brunner, E and Pauly, M (2016). Permuting longitudinal data despite all the dependencies. arXiv preprint arXiv:1509.05570v2
+#' @references Friedrich, S., Brunner, E. and Pauly, M. (2017). Permuting longitudinal data
+#'  in spite of the dependencies. Journal of Multivariate Analysis, 153, 255-265.
 #' 
 #'  Bathke, A., Friedrich, S., Konietschke, F., Pauly, M., Staffen, W., Strobl, N. and Hoeller, Y. (2016). Using EEG, SPECT, and Multivariate Resampling Methods
 #' to Differentiate Between Alzheimer's and other Cognitive Impairments. arXiv preprint arXiv:1606.09004
@@ -69,7 +72,7 @@
 #' @export
 
 RM <- function(formula, data, subject,
-                   no.subf = 1, iter = 10000, alpha = 0.05, resampling = "Perm", CPU){
+                   no.subf = 1, iter = 10000, alpha = 0.05, resampling = "Perm", CPU, seed){
   
   if (!(resampling %in% c("Perm", "paramBS", "WildBS"))){
     stop("Resampling must be one of 'Perm', 'paramBS' or 'WildBS'!")
@@ -80,9 +83,14 @@ RM <- function(formula, data, subject,
                      iter = iter, alpha = alpha, resampling = resampling)
   
   
-  test <- hasArg(CPU)
-  if(!test){
+  test1 <- hasArg(CPU)
+  if(!test1){
     CPU <- parallel::detectCores()
+  }
+  
+  test2 <- hasArg(seed)
+  if(!test2){
+    seed <- 0
   }
   
   
@@ -120,7 +128,7 @@ RM <- function(formula, data, subject,
     rownames(WTS_out) <- fac_names
     rownames(ATS_out) <- fac_names
     names(WTPS_out) <- fac_names
-    results <- RM.Stat.oneway(data = response, n = n, t = fl, hypo, iter = iter, alpha, resampling)
+    results <- RM.Stat.oneway(data = response, n = n, t = fl, hypo, iter = iter, alpha, resampling, seed)
     WTS_out <- results$WTS
     ATS_out <- results$ATS
     WTPS_out <- results$WTPS
@@ -206,7 +214,7 @@ RM <- function(formula, data, subject,
     if (n.whole == 0 && nf !=1) {
       for (i in 1:length(hypo_matrices)) {
         results <- RM.Stat.sub(data = response, nind = nind[1], n, hypo_matrices[[i]],
-                               iter, alpha, n.sub, n.groups, resampling)
+                               iter, alpha, n.sub, n.groups, resampling, seed)
         WTS_out[i, ] <- results$WTS
         ATS_out[i, ] <- results$ATS
         WTPS_out[i, ] <- results$WTPS
@@ -214,7 +222,7 @@ RM <- function(formula, data, subject,
     } else {  
       for (i in 1:length(hypo_matrices)) {
         results <- RM.Stat(data = response, nind, n, hypo_matrices[[i]],
-                           iter, alpha, iii = i, whole_count, n.sub, n.groups, resampling, CPU)
+                           iter, alpha, iii = i, whole_count, n.sub, n.groups, resampling, CPU, seed)
         WTS_out[i, ] <- results$WTS
         ATS_out[i, ] <- results$ATS
         WTPS_out[i, ] <- results$WTPS

@@ -5,7 +5,7 @@
 \title{Tests for Multivariate Data in Semi-Parametric Factorial Designs}
 \usage{
 MANOVA(formula, data, subject, iter = 10000, alpha = 0.05,
-  resampling = "paramBS", CPU)
+  resampling = "paramBS", CPU, seed)
 }
 \arguments{
 \item{formula}{A model \code{\link{formula}} object. The left hand side 
@@ -13,21 +13,24 @@ contains the response variable and the right hand side contains the factor
 variables of interest. An interaction term must be specified.}
 
 \item{data}{A data.frame, list or environment containing the variables in 
-\code{formula}.}
+\code{formula}. Data must be in long format.}
 
-\item{subject}{the column name of the subjects in the data.}
+\item{subject}{The column name of the subjects in the data.}
 
 \item{iter}{The number of iterations used for calculating the resampled 
-statistic. The default option is 10000.}
+statistic. The default option is 10,000.}
 
 \item{alpha}{A number specifying the significance level; the default is 0.05.}
 
 \item{resampling}{The resampling method to be used, one of "paramBS"
 (parametric bootstrap approach) and "WildBS" (wild bootstrap approach with
-Rademacher weights). The Wild Bootstrap is applied to both test statistics.}
+Rademacher weights). The Wild Bootstrap is calculated for all test statistics.}
 
 \item{CPU}{The number of cores used for parallel computing. If omitted, cores are
 detected via \code{\link[parallel]{detectCores}}.}
+
+\item{seed}{A random seed for the resampling procedure. If omitted, no 
+reproducible seed is set.}
 }
 \value{
 A \code{MANOVA} object containing the following components: 
@@ -39,23 +42,28 @@ A \code{MANOVA} object containing the following components:
   central chi-square distribution and p-value.} 
   \item{ATS}{The value of the
   ATS, degrees of freedom of the central F distribution and the corresponding
-  p-value.} 
+  p-value.}
+  \item{MATS}{The value of the MATS.} 
   \item{resampling}{p-values for the test statistic based on the
   chosen resampling approach.}
 }
 \description{
 The MANOVA function calculates the Wald-type statistic (WTS), the ANOVA-type 
-statistic (ATS) as well as resampling versions of these test statistics for 
+statistic (ATS) and a modified ATS (MATS) as well as resampling versions of 
+these test statistics for 
 semi-parametric multivariate data.
 }
 \details{
-The MANOVA() function provides the Wald-type statistic as well as
-  the ANOVA-type statistic for multivariate designs with metric data as described in 
-  Konietschke et al. (2015). These tests are even applicable for non-normal error terms, 
+The MANOVA() function provides the Wald-type statistic (WTS) as well as
+  the ANOVA-type statistic (ATS) for multivariate designs with metric data as described in 
+  Konietschke et al. (2015). Furthermore, it contains a modified ATS (MATS), which is invariant
+  under scale transformations of the components and applicable to designs with singular covariance
+  matrices, see Friedrich and Pauly (2017) for details.
+  These tests are even applicable for non-normal error terms, 
   different sample sizes and/or heteroscedastic variances.
   They are implemented for designs with an arbitrary number of
   crossed factors or for nested designs. In addition to the asymptotic
-  p-values, it also provides p-values based on resampling approaches.
+  p-values, the function also provides p-values based on resampling approaches.
 }
 \section{NOTE}{
  The number of resampling iterations has been set to 100 in the examples due to run time 
@@ -74,15 +82,19 @@ Konietschke, F., Bathke, A. C., Harrar, S. W. and Pauly, M. (2015).
   Parametric and nonparametric bootstrap methods for general MANOVA. Journal 
   of Multivariate Analysis, 140, 291-301.
   
-  Friedrich, S, Brunner, E and Pauly, M (2016). Permuting longitudinal data 
-  despite all the dependencies. arXiv preprint arXiv:1509.05570v2
+  Friedrich, S., Brunner, E. and Pauly, M. (2017). Permuting longitudinal data
+  in spite of the dependencies. Journal of Multivariate Analysis, 153, 255-265.
   
-   Bathke, A., Friedrich, S., Konietschke, F., Pauly, M., Staffen, W., Strobl, N. and Hoeller, Y. (2016). Using EEG, SPECT, and Multivariate Resampling Methods
-to Differentiate Between Alzheimer's and other Cognitive Impairments. arXiv preprint arXiv:1606.09004.
+   Bathke, A., Friedrich, S., Konietschke, F., Pauly, M., Staffen, W., Strobl, N. and Hoeller, Y. (2016).
+   Using EEG, SPECT, and Multivariate Resampling Methods
+   to Differentiate Between Alzheimer's and other Cognitive Impairments. arXiv preprint arXiv:1606.09004.
   
-  Friedrich, S., Konietschke, F., Pauly, M.(2016). GFD - An 
+  Friedrich, S., Konietschke, F., Pauly, M. (2016). GFD - An 
   R-package for the Analysis of General Factorial Designs. Accepted for publication in 
   Journal of Statistical Software.
+  
+  Friedrich, S., and Pauly, M. (2017). MATS: Inference for potentially singular and
+  heteroscedastic MANOVA. arXiv preprint arXiv:1704.03731.
 }
 \seealso{
 \code{\link{RM}}

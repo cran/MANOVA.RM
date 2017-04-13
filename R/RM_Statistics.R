@@ -1,5 +1,5 @@
 ## function for calculating test statistics, permutation etc for repeated measures
-RM.Stat<- function(data, nind, n, hypo_matrix, iter, alpha, iii, hypo_counter, n.sub, n.groups, resampling, CPU){
+RM.Stat<- function(data, nind, n, hypo_matrix, iter, alpha, iii, hypo_counter, n.sub, n.groups, resampling, CPU, seed){
   
   N <- sum(nind)
   H <- hypo_matrix
@@ -136,16 +136,25 @@ RM.Stat<- function(data, nind, n, hypo_matrix, iter, alpha, iii, hypo_counter, n
   cl <- makeCluster(CPU)
   
   if(resampling == "Perm"){
+    if(seed != 0){
+      parallel::clusterSetRNGStream(cl, iseed = seed)
+    }
     WTPS <- parSapply(cl, 1:iter, FUN = Perm)
     ecdf_WTPS <- ecdf(WTPS)
     p_valueWTPS <- 1-ecdf_WTPS(WTS)
     p_valueATS_res <- NA
   } else if(resampling == "paramBS"){
+    if(seed != 0){
+      parallel::clusterSetRNGStream(cl, iseed = seed)
+    }
     WTPS <- parSapply(cl, 1:iter, FUN = PBS)
     ecdf_WTPS <- ecdf(WTPS)
     p_valueWTPS <- 1-ecdf_WTPS(WTS)    
     p_valueATS_res <- NA
   } else if(resampling == "WildBS"){
+    if(seed != 0){
+      parallel::clusterSetRNGStream(cl, iseed = seed)
+    }
     WTPS <- parSapply(cl, 1:iter, FUN = WBS)
     ecdf_WTPS <- ecdf(unlist(WTPS[1, ]))
     p_valueWTPS <- 1-ecdf_WTPS(WTS)    

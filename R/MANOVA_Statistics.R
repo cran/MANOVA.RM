@@ -1,5 +1,5 @@
 ## function for calculating test statistics for MANOVA
-MANOVA.Stat<- function(data, n, hypo_matrix, iter, alpha, resampling, n.groups, p, CPU){
+MANOVA.Stat<- function(data, n, hypo_matrix, iter, alpha, resampling, n.groups, p, CPU, seed){
   
   N <- sum(n)
   H <- hypo_matrix
@@ -35,13 +35,14 @@ MANOVA.Stat<- function(data, n, hypo_matrix, iter, alpha, resampling, n.groups, 
   
   # ATS
   C <- t(H) %*% MASS::ginv(H %*% t(H)) %*% H
-  D <- diag(C) * diag(ncol(C))
   spur <- sum(diag(C %*% Sn))
-  # Lambda <- diag(1 / (n - 1))
   ATS <- N / spur * t(means) %*% C %*% means
   df_ATS <- spur ^ 2 / sum(diag(C %*% Sn %*% C %*% Sn))
-  # df_ATS2 <- spur ^ 2 / sum(diag(D %*% D %*% Sn %*% Sn %*% Lambda))
   df_ATS2 <- Inf
+  
+  # MATS
+  D <- diag(Sn)*diag(p*n.groups)
+  Q_N <- N* t(means)%*%t(H)%*%MASS::ginv(H%*%D%*%t(H))%*%H%*%means
   
   #--------------------------------- parametric bootstrap ---------------------------#
   PBS <- function(i, ...){
@@ -65,9 +66,14 @@ MANOVA.Stat<- function(data, n, hypo_matrix, iter, alpha, resampling, n.groups, 
     }
     SnP <- N * sigma_hatP
     
+    # WTS
     TP <- t(H) %*% MASS::ginv(H %*% SnP %*% t(H)) %*% H
     WTPS <- diag(N * t(meansP) %*% TP %*% meansP)
-    return(WTPS)
+    
+    # MATS
+    DP <- diag(SnP)*diag(p*n.groups)
+    Q_N_P <- N* t(meansP)%*%t(H)%*%MASS::ginv(H%*%DP%*%t(H))%*%H%*%meansP
+    return(list(WTPS, Q_N_P))
   }
   
   #---------------------------------- Wild bootstrap ---------------------------------#
@@ -75,47 +81,59 @@ MANOVA.Stat<- function(data, n, hypo_matrix, iter, alpha, resampling, n.groups, 
     
     VP <- list(NA)
     xperm <- list(NA)
+    meansP <- list()
     for (i in 1:n.groups){
       y <- matrix(x[(n.temp[i]*p+1):(n.temp[i+1]*p)], ncol = p, byrow = TRUE)
-      means2 <- rep(colMeans(y), n[i])
       epsi <- 2*rbinom(n[i], 1, 1/2)-1
-      xperm[[i]] <- rep(epsi, p)*(y -means2)
+      xperm[[i]] <- epsi*(y - colMeans(y))
       VP[[i]] <- 1 / n[i] * cov(xperm[[i]])
+      meansP[[i]] <- colMeans(xperm[[i]])
     }
+    meansP <- unlist(meansP)
     
     sigma_hatP <- VP[[1]]
     for (i in 2:n.groups){
       sigma_hatP <- magic::adiag(sigma_hatP, VP[[i]])
     }
-    SnP <- N * sigma_hat
-    
-    xperm <- unlist(xperm)
-    meansP <- A %*% xperm
+    SnP <- N * sigma_hatP
     
     # WTS
     TP <- t(H) %*% MASS::ginv(H %*% SnP %*% t(H)) %*% H
-    WTPS <- diag(N * t(meansP) %*% TP %*% meansP)
+    WTPS <- N * t(meansP) %*% TP %*% meansP
     # ATS
     C <- t(H) %*% MASS::ginv(H %*% t(H)) %*% H
     spur <- sum(diag(C %*% SnP))
     ATS_res <- N / spur * t(meansP) %*% C %*% meansP
-    return(list(WTPS, ATS_res))
+    # MATS
+    DP <- diag(SnP)*diag(p*n.groups)
+    Q_N_P <- N* t(meansP)%*%t(H)%*%MASS::ginv(H%*%DP%*%t(H))%*%H%*%meansP
+    return(list(WTPS, ATS_res, Q_N_P))
   }
   
   time1 <- Sys.time()  
   cl <- makeCluster(CPU)
   
   if(resampling == "paramBS"){
+    if(seed != 0){
+    parallel::clusterSetRNGStream(cl, iseed = seed)
+    }
     WTPS <- parSapply(cl, 1:iter, FUN = PBS)
-    ecdf_WTPS <- ecdf(WTPS)
-    p_valueWTPS <- 1-ecdf_WTPS(WTS)    
-    p_valueATS_res <- NA       
+    ecdf_WTPS <- ecdf(unlist(WTPS[1, ]))
+    p_valueWTPS <- 1-ecdf_WTPS(WTS)
+    p_valueATS_res <- NA
+    ecdf_MATS <- ecdf(unlist(WTPS[2, ]))
+    p_valueMATS <- 1 - ecdf_MATS(Q_N)
   } else if(resampling == "WildBS"){
+    if(seed != 0){
+    parallel::clusterSetRNGStream(cl, iseed = seed)
+    }
     WTPS <- parSapply(cl, 1:iter, FUN = WBS)
     ecdf_WTPS <- ecdf(unlist(WTPS[1, ]))
     p_valueWTPS <- 1-ecdf_WTPS(WTS)    
     ecdf_ATS_res <- ecdf(unlist(WTPS[2, ]))
-    p_valueATS_res <- 1-ecdf_ATS_res(ATS)    
+    p_valueATS_res <- 1-ecdf_ATS_res(ATS)
+    ecdf_MATS <- ecdf(unlist(WTPS[3, ]))
+    p_valueMATS <- 1-ecdf_MATS(Q_N)
   }
   
   time <- Sys.time() - time1
@@ -129,12 +147,18 @@ MANOVA.Stat<- function(data, n, hypo_matrix, iter, alpha, resampling, n.groups, 
   CI_lower <- means - sqrt(diag(Sn) / n) * qt(1 - alpha / 2, df = n)
   CI_upper <- means + sqrt(diag(Sn) / n) * qt(1 - alpha / 2, df = n)
   
+  #--------------------- Quantiles -------------------------------#
+  quant_WTS <- quantile(ecdf_WTPS, alpha)
+  quant_MATS <- quantile(ecdf_MATS, alpha)
+  
   #-------------------- Output ----------------------------------#
+  quantiles <- c(quant_WTS, quant_MATS)
   WTS_out <- c(WTS, df_WTS, p_valueWTS)
   ATS_out <- c(ATS, df_ATS, df_ATS2, p_valueATS)
-  WTPS_out <- c(p_valueWTPS, p_valueATS_res)
+  MATS_out <- Q_N
+  WTPS_out <- c(p_valueWTPS, p_valueATS_res, p_valueMATS)
   CI <- cbind(CI_lower, CI_upper)
-  result <- list(WTS = WTS_out, WTPS = WTPS_out, ATS = ATS_out,
-                 Cov = Sn, Mean = means, CI = CI, time = time)
+  result <- list(WTS = WTS_out, WTPS = WTPS_out, ATS = ATS_out, MATS = MATS_out,
+                 Cov = Sn, Mean = means, CI = CI, time = time, quantiles = quantiles)
   return(result)
 }
