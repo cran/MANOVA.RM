@@ -5,7 +5,7 @@
 \title{Tests for Multivariate Data in Semi-Parametric Factorial Designs}
 \usage{
 MANOVA(formula, data, subject, iter = 10000, alpha = 0.05,
-  resampling = "paramBS", CPU, seed)
+  resampling = "paramBS", CPU, seed, nested.levels.unique = FALSE)
 }
 \arguments{
 \item{formula}{A model \code{\link{formula}} object. The left hand side 
@@ -31,6 +31,11 @@ detected via \code{\link[parallel]{detectCores}}.}
 
 \item{seed}{A random seed for the resampling procedure. If omitted, no 
 reproducible seed is set.}
+
+\item{nested.levels.unique}{A logical specifying whether the levels of the nested factor(s)
+are labeled uniquely or not. Default is FALSE, i.e., the levels of the nested 
+factor are the same for each level of the main factor. For an example and more explanations
+see the GFD package and the corresponding vignette.}
 }
 \value{
 A \code{MANOVA} object containing the following components: 

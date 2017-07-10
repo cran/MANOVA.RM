@@ -119,7 +119,7 @@ The resampling methods provided are a parametric bootstrap approach and a
 wild bootstrap using Rademacher weights. The wild bootstrap is also implemented for the ATS, while the parametric approach works only for the WTS and MATS,
 see Konietschke et al. (2015) for details. 
 Note that only balanced nested designs (i.e., the same number of factor levels $b$ for each level of the factor $A$) with up to three factors are 
-implemented. Designs involving both crossed and nested factors are not implemented.
+implemented. Designs involving both crossed and nested factors are not implemented. Data must be provided in long format (for wide format, see `MANOVA.wide` below).
 
 
 ### Data Example MANOVA (two crossed factors)
@@ -152,6 +152,28 @@ summary(EEG_MANOVA)
 
 The output consists of several parts: First, some descriptive statistics of the data set are displayed, namely the sample size and mean for each factor level combination and each dimension (dimensions occur in the same order as in the original data set). In this example, Mean 1 to Mean 3 correspond to the brainrate (temporal, frontal, central) while Mean 4--6 correspond to complexity. Second, the results based on the WTS are displayed. For each factor, the test statistic, degree of freedom and p-value is given. The output for the ATS is similar. For the MATS, only the value of the test statistic is given, since inference is here based on the resampling procedure only. The resampling-based p-values are finally displayed for all test statistics (where applicable).
 
+
+### The `MANOVA.wide` function
+
+The `MANOVA.wide` function provides a wrapper for data provided in wide format, i.e., with one row per unit. Input and output are almost identical to the `MANOVA` function, except that no `subject` variable needs to be specified. The formula now consists of the matrix of outcome variables (bound together via `cbind()`) on the left hand side of the \~ operator and the factors of interest (including an interaction term) on the right.
+For an example we use the data provided as an example for the `summary.manova()` function:
+
+```{r}
+tear <- c(6.5, 6.2, 5.8, 6.5, 6.5, 6.9, 7.2, 6.9, 6.1, 6.3,
+          6.7, 6.6, 7.2, 7.1, 6.8, 7.1, 7.0, 7.2, 7.5, 7.6)
+gloss <- c(9.5, 9.9, 9.6, 9.6, 9.2, 9.1, 10.0, 9.9, 9.5, 9.4,
+           9.1, 9.3, 8.3, 8.4, 8.5, 9.2, 8.8, 9.7, 10.1, 9.2)
+opacity <- c(4.4, 6.4, 3.0, 4.1, 0.8, 5.7, 2.0, 3.9, 1.9, 5.7,
+             2.8, 4.1, 3.8, 1.6, 3.4, 8.4, 5.2, 6.9, 2.7, 1.9)
+rate     <- gl(2,10, labels = c("Low", "High"))
+additive <- gl(2, 5, length = 20, labels = c("Low", "High"))
+
+example <- data.frame(tear, gloss, opacity, rate, additive)
+fit <- MANOVA.wide(cbind(tear, gloss, opacity) ~ rate * additive, data = example, iter = 1000, CPU = 1)
+summary(fit)
+```
+
+
 ### Confidence regions
 
 The `MANOVA` function is equipped with a function for calculating and plotting of confidence regions.
@@ -164,19 +186,17 @@ The `conf.reg` function takes as arguments:
 * `object`: A `MANOVA` object calculated via `MANOVA()`.
 * `nullhypo`: In designs involving more than one factor, it is necessary to specify the null hypothesis, i.e., the contrast of interest.
 
-As an example, we consider the data set `water` from the package `HSAUR`. The data set contains measurements of mortality and drinking water hardness for 61 cities in England and Wales. Suppose we want to analyse whether these measurements differ between northern and southern towns. Since the data set is in wide format, we first need to transform it into long format before applying the `MANOVA` function.
+As an example, we consider the data set `water` from the package `HSAUR`. The data set contains measurements of mortality and drinking water hardness for 61 cities in England and Wales. Suppose we want to analyse whether these measurements differ between northern and southern towns. Since the data set is in wide format, we need to use the `MANOVA.wide` function.
 
 ```{r}
+if (requireNamespace("HSAUR", quietly = TRUE)) {
 library(HSAUR)
 data(water)
-water$subject <- 1:dim(water)[1]
-library(tidyr)
-data_long <- gather(water, measurement, response, mortality:hardness, factor_key=TRUE)
-head(data_long)
-test <- MANOVA(response ~ location, data = data_long, subject = "subject", iter = 1000, resampling = "paramBS", CPU = 1, seed = 123)
+test <- MANOVA.wide(cbind(mortality, hardness) ~ location, data = water, iter = 1000, resampling = "paramBS", CPU = 1, seed = 123)
 summary(test)
 cr <- conf.reg(test)
 cr
+}
 ```
 
 The output consists of the necessary parameters specifying the ellipsoid: the center, the eigenvectors which determine the axes of the ellipsoid as well as the scaling factors for the eigenvectors, which are calculated based on the eigenvalues, the bootstrap quantile and the total sample size. For more information on the construction of the confidence ellipses see Friedrich and Pauly (2017). 
@@ -186,6 +206,34 @@ For observations with two dimensions, the confidence ellipse can be plotted usin
 plot(cr, col = 2, lty = 2, xlab = "Difference in mortality", ylab ="Difference in water hardness")
 ```
 
+### Nested Design
+To create a data example for a nested design, we use the `curdies` data set from the `GFD` package and extend it by introducing an artificial second outcome variable. In this data set, the levels of the nested factor (site) are named uniquely, i.e., levels 1-3 of factor site belong to "WINTER", whereas levels 4-6 belong to "SUMMER". Therefore, `nested.levels.unique` must be set to TRUE. The code for the analysis using both wide and long format is presented below.
+
+
+```{r}
+if (requireNamespace("GFD", quietly = TRUE)) {
+library(GFD)
+data(curdies)
+set.seed(123)
+curdies$dug2 <- curdies$dugesia + rnorm(36)
+
+# first possibility: MANOVA.wide
+fit1 <- MANOVA.wide(cbind(dugesia, dug2) ~ season + season:site, data = curdies, iter = 100, nested.levels.unique = TRUE, seed = 123, CPU = 1)
+
+# second possibility: MANOVA (long format)
+dug <- c(curdies$dugesia, curdies$dug2)
+season <- rep(curdies$season, 2)
+site <- rep(curdies$site, 2)
+curd <- data.frame(dug, season, site, subject = rep(1:36, 2))
+
+fit2 <- MANOVA(dug ~ season + season:site, data = curd, subject = "subject", nested.levels.unique = TRUE, seed = 123, iter = 100, CPU = 1)
+
+# comparison of results
+summary(fit1)
+summary(fit2)
+}
+```
+
 
 ## optional GUI
 
@@ -193,7 +241,9 @@ The `MANOVA.RM` package is equipped with an optional graphical user interface, w
 command `GUI.RM()` and `GUI.MANOVA()` for repeated measures designs and multivariate data, respectively. 
 
 ```{r}
+if (requireNamespace("RGtk2", quietly = TRUE)) {
 GUI.MANOVA()
+}
 ```
 
 The user can specify the data location

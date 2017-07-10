@@ -1,8 +1,8 @@
 Package: MANOVA.RM
 Type: Package
 Title: Analysis of Multivariate Data and Repeated Measures Designs
-Version: 0.0.5
-Date: 2017-04-12
+Version: 0.1.1
+Date: 2017-07-10
 Author: Sarah Friedrich, Frank Konietschke, Markus Pauly
 Maintainer: Sarah Friedrich <sarah.friedrich@uni-ulm.de>
 Depends: R (>= 3.2.3)
@@ -14,10 +14,10 @@ License: GPL-2 | GPL-3
 Imports: plyr (>= 1.8.3), MASS (>= 7.3-43), Matrix (>= 1.2-2), magic
         (>= 1.5-6), plotrix (>= 3.5-12), parallel, methods, ellipse
 LazyData: TRUE
-Suggests: RGtk2 (>= 2.20.31), knitr, rmarkdown, HSAUR, tidyr
+Suggests: RGtk2 (>= 2.20.31), knitr, rmarkdown, HSAUR, tidyr, GFD
 RoxygenNote: 5.0.1
 VignetteBuilder: knitr, rmarkdown
 NeedsCompilation: no
-Packaged: 2017-04-13 06:26:57 UTC; sarah
+Packaged: 2017-07-10 13:59:33 UTC; sarah
 Repository: CRAN
-Date/Publication: 2017-04-13 17:47:24 UTC
+Date/Publication: 2017-07-10 18:20:07 UTC

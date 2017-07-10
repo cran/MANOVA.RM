@@ -1,16 +1,15 @@
 #' Tests for Multivariate Data in Semi-Parametric Factorial Designs
 #' 
-#' The MANOVA function calculates the Wald-type statistic (WTS), the ANOVA-type 
+#' The MANOVA.wide function calculates the Wald-type statistic (WTS), the ANOVA-type 
 #' statistic (ATS) and a modified ATS (MATS) as well as resampling versions of 
 #' these test statistics for 
-#' semi-parametric multivariate data.
+#' semi-parametric multivariate data provided in wide format.
 #' 
 #' @param formula A model \code{\link{formula}} object. The left hand side 
-#'   contains the response variable and the right hand side contains the factor 
+#'   contains the matrix of response variables and the right hand side contains the factor 
 #'   variables of interest. An interaction term must be specified.
 #' @param data A data.frame, list or environment containing the variables in 
-#'   \code{formula}. Data must be in long format.
-#' @param subject The column name of the subjects in the data.
+#'   \code{formula}. Data must be in wide format.
 #' @param iter The number of iterations used for calculating the resampled 
 #'   statistic. The default option is 10,000.
 #' @param alpha A number specifying the significance level; the default is 0.05.
@@ -26,74 +25,32 @@
 #'   factor are the same for each level of the main factor. For an example and more explanations
 #'   see the GFD package and the corresponding vignette.
 #'  
-#'   
-#' @details The MANOVA() function provides the Wald-type statistic (WTS) as well as
-#'   the ANOVA-type statistic (ATS) for multivariate designs with metric data as described in 
-#'   Konietschke et al. (2015). Furthermore, it contains a modified ATS (MATS), which is invariant
-#'   under scale transformations of the components and applicable to designs with singular covariance
-#'   matrices, see Friedrich and Pauly (2017) for details.
-#'   These tests are even applicable for non-normal error terms, 
-#'   different sample sizes and/or heteroscedastic variances.
-#'   They are implemented for designs with an arbitrary number of
-#'   crossed factors or for nested designs. In addition to the asymptotic
-#'   p-values, the function also provides p-values based on resampling approaches.
-#'  
 #' @section NOTE: The number of resampling iterations has been set to 100 in the examples due to run time 
 #' restrictions on CRAN. Usually it is recommended to use at least 1000 iterations.
 #'     
-#' @return A \code{MANOVA} object containing the following components: 
-#'   \item{Descriptive}{Some descriptive statistics of the data for all factor 
-#'   level combinations. Displayed are the number of individuals per factor 
-#'   level combination and the vector of means (one column per dimension).}
-#'   \item{Covariance}{The estimated covariance matrix.} 
-#'   \item{WTS}{The value of the WTS along with degrees of freedom of the
-#'   central chi-square distribution and p-value.} 
-#'   \item{ATS}{The value of the
-#'   ATS, degrees of freedom of the central F distribution and the corresponding
-#'   p-value.}
-#'   \item{MATS}{The value of the MATS.} 
-#'   \item{resampling}{p-values for the test statistic based on the
-#'   chosen resampling approach.}
+#' @return See \code{\link{MANOVA}}
 #'  
-#'  
-#' @examples data(EEG)
-#' EEG_mod <- MANOVA(resp ~ sex * diagnosis, 
-#'                     data = EEG, subject = "id", resampling = "paramBS", 
-#'                     alpha = 0.05, iter = 100, CPU = 1)
-#' summary(EEG_mod)
+#' @examples 
+#' #Example on producing plastic film from Krzanowski (1998, p. 381), see \code{\link{manova.summary}}
+#' tear <- c(6.5, 6.2, 5.8, 6.5, 6.5, 6.9, 7.2, 6.9, 6.1, 6.3,
+#'           6.7, 6.6, 7.2, 7.1, 6.8, 7.1, 7.0, 7.2, 7.5, 7.6)
+#' gloss <- c(9.5, 9.9, 9.6, 9.6, 9.2, 9.1, 10.0, 9.9, 9.5, 9.4,
+#'            9.1, 9.3, 8.3, 8.4, 8.5, 9.2, 8.8, 9.7, 10.1, 9.2)
+#' opacity <- c(4.4, 6.4, 3.0, 4.1, 0.8, 5.7, 2.0, 3.9, 1.9, 5.7,
+#'              2.8, 4.1, 3.8, 1.6, 3.4, 8.4, 5.2, 6.9, 2.7, 1.9)
+#' rate     <- gl(2,10, labels = c("Low", "High"))
+#' additive <- gl(2, 5, length = 20, labels = c("Low", "High"))
+#' example <- data.frame(tear, gloss, opacity, rate, additive)
+#' fit <- MANOVA.wide(cbind(tear, gloss, opacity) ~ rate * additive, 
+#' data = example, iter = 100, CPU = 1)
+#' summary(fit)
 #' 
-#' @seealso \code{\link{RM}}
-#'   
-#' @references Konietschke, F., Bathke, A. C., Harrar, S. W. and Pauly, M. (2015). 
-#'   Parametric and nonparametric bootstrap methods for general MANOVA. Journal 
-#'   of Multivariate Analysis, 140, 291-301.
-#'   
-#'   Friedrich, S., Brunner, E. and Pauly, M. (2017). Permuting longitudinal data
-#'   in spite of the dependencies. Journal of Multivariate Analysis, 153, 255-265.
-#'   
-#'    Bathke, A., Friedrich, S., Konietschke, F., Pauly, M., Staffen, W., Strobl, N. and Hoeller, Y. (2016).
-#'    Using EEG, SPECT, and Multivariate Resampling Methods
-#'    to Differentiate Between Alzheimer's and other Cognitive Impairments. arXiv preprint arXiv:1606.09004.
-#'   
-#'   Friedrich, S., Konietschke, F., Pauly, M. (2016). GFD - An 
-#'   R-package for the Analysis of General Factorial Designs. Accepted for publication in 
-#'   Journal of Statistical Software.
-#'   
-#'   Friedrich, S., and Pauly, M. (2017). MATS: Inference for potentially singular and
-#'   heteroscedastic MANOVA. arXiv preprint arXiv:1704.03731.
-#'    
-#'   
-#' @importFrom graphics axis legend par plot title abline points
-#' @importFrom stats ecdf formula model.frame pchisq pf qt terms var cov rbinom quantile
-#' @importFrom utils read.table
-#' @importFrom methods hasArg
-#' @importFrom MASS mvrnorm
-#' @importFrom parallel makeCluster parSapply detectCores
-#' @importFrom ellipse ellipse
-#'   
+#' 
+#' @seealso \code{\link{MANOVA}}
+#'
 #' @export
 
-MANOVA <- function(formula, data, subject,
+MANOVA.wide <- function(formula, data,
                    iter = 10000, alpha = 0.05, resampling = "paramBS", CPU,
                    seed, nested.levels.unique = FALSE){
   
@@ -102,7 +59,6 @@ MANOVA <- function(formula, data, subject,
   }
   
   input_list <- list(formula = formula, data = data,
-                     subject = subject, 
                      iter = iter, alpha = alpha, resampling = resampling)
   
   test1 <- hasArg(CPU)
@@ -116,16 +72,21 @@ MANOVA <- function(formula, data, subject,
   }
   
   dat <- model.frame(formula, data)
-  if (!(subject %in% names(data))){
-    stop("The subject variable is not found!")
-  }
-  subject <- data[, subject]
-  # no. of dimensions 
-  p <- length(subject)/length(unique(subject))
-  dat2 <- data.frame(dat, subject = subject)
-  nf <- ncol(dat) - 1
-  nadat <- names(dat)
-  nadat2 <- nadat[-1]
+  nr_hypo <- attr(terms(formula), "factors")
+  perm_names <- t(attr(terms(formula), "factors")[-1, ])
+  fac_names <- colnames(nr_hypo)
+  
+  outcome_names <- rownames(nr_hypo)[1]  # names of outcome variables
+  # extract names of outcome variables
+  split1 <- strsplit(outcome_names, "(", fixed = TRUE)[[1]][-1]
+  split2 <- strsplit(split1, ")", fixed = TRUE)[[1]]
+  split3 <- strsplit(split2, ",")[[1]]
+  
+  EF <- rownames(nr_hypo)[-1]  # names of influencing factors
+  nf <- length(EF)
+  names(dat) <- c("response", EF)
+  #no. dimensions
+  p <- ncol(dat$response)
   fl <- NA
   for (aa in 1:nf) {
     fl[aa] <- nlevels(as.factor(dat[, (aa + 1)]))
@@ -135,16 +96,16 @@ MANOVA <- function(formula, data, subject,
     levels[[jj]] <- levels(as.factor(dat[, (jj + 1)]))
   }
   lev_names <- expand.grid(levels)
+  
   if (nf == 1) {
     # one-way layout
-    nr_hypo <- attr(terms(formula), "factors")
-    fac_names <- colnames(nr_hypo)
-    dat2 <- dat2[order(dat2[, 2]), ]
-    response <- dat2[, 1]    
-    # contrast matrix
+    dat2 <- dat[order(dat[, 2]), ]
+    fac.groups <- dat2[, 2]
+    n.groups <- prod(fl)
+    Y <- split(dat2, fac.groups)
+    n <- sapply(Y, nrow)
     hypo <- (diag(fl) - matrix(1 / fl, ncol = fl, nrow = fl)) %x% diag(p)
-    n <- plyr::ddply(dat2, nadat2, plyr::summarise, Measure = length(unique(subject)),
-                     .drop = F)$Measure
+    
     WTS_out <- matrix(NA, ncol = 3, nrow = 1)
     ATS_out <- matrix(NA, ncol = 4, nrow = 1)
     MATS_out <- NA
@@ -153,7 +114,7 @@ MANOVA <- function(formula, data, subject,
     rownames(WTS_out) <- fac_names
     rownames(ATS_out) <- fac_names
     names(WTPS_out) <- fac_names
-    results <- MANOVA.Stat(data = response, n = n, hypo, iter = iter, alpha, resampling, n.groups = fl, p, CPU, seed)    
+    results <- MANOVA.Stat.wide(Y, n = n, hypo, iter = iter, alpha, resampling, CPU, seed)    
     WTS_out <- results$WTS
     ATS_out <- results$ATS
     MATS_out <- results$MATS
@@ -162,10 +123,8 @@ MANOVA <- function(formula, data, subject,
     names(quantiles) <- c("WTS_resampling", "MATS_resampling")
     mean_out <- matrix(results$Mean, ncol = p, byrow = TRUE)
     Var_out <- results$Cov
-    #    CI <- results$CI
-    #    colnames(CI) <- c("lower", "upper")
     descriptive <- cbind(lev_names, n, mean_out)
-    colnames(descriptive) <- c(nadat2, "n", rep("Means", p))   
+    colnames(descriptive) <- c(EF, "n", split3)  
     names(WTS_out) <- cbind ("Test statistic", "df",
                              "p-value")
     names(ATS_out) <- cbind("Test statistic", "df1", "df2", "p-value")
@@ -173,7 +132,6 @@ MANOVA <- function(formula, data, subject,
     output <- list()
     output$input <- input_list
     output$Descriptive <- descriptive
-    #    output$CI <- CI
     output$Covariance <- Var_out
     output$WTS <- WTS_out
     output$ATS <- ATS_out
@@ -188,18 +146,12 @@ MANOVA <- function(formula, data, subject,
     output$Means <- mean_out
     # end one-way layout ------------------------------------------------------
   } else {
-    dat2 <- dat2[do.call(order, dat2[, 2:(nf + 1)]), ]
-    lev_names <- lev_names[do.call(order, lev_names[, 1:nf]), ]
-    response <- dat2[, 1]
-    nr_hypo <- attr(terms(formula), "factors")
-    fac_names <- colnames(nr_hypo)
-    fac_names_original <- fac_names
-    perm_names <- t(attr(terms(formula), "factors")[-1, ])
-    gr <- nadat2[1]
-    n <- plyr::ddply(dat2, nadat2, plyr::summarise, Measure = length(subject),
-                     .drop = F)
-    n <- n$Measure/p
-    
+    dat2 <- dat[do.call(order, dat[, 2:(nf + 1)]), ]
+    fac.groups <- do.call(list, dat2[, 2:(nf+1)])
+   
+    Y <- split(dat2, fac.groups, lex.order = TRUE)
+    n <- sapply(Y, nrow)
+
     if (length(fac_names) == nf) {
       # nested
       
@@ -240,8 +192,20 @@ MANOVA <- function(formula, data, subject,
     } else {
       # crossed
       hypo_matrices <- HC_MANOVA(fl, perm_names, fac_names, p)[[1]]
-      fac_names <- HC_MANOVA(fl, perm_names, fac_names, p)[[2]]
     }
+    
+    n.groups <- prod(fl)
+    
+    if(length(Y) != n.groups){
+      index <- NULL
+      for(i in 1:length(Y)){
+        if(nrow(Y[[i]]) == 0){
+           index <- c(index, i)
+        }
+      }
+      Y <- Y[-index]
+    }
+    
     
     # ---------------------- error detection ------------------------------------
     
@@ -267,8 +231,6 @@ MANOVA <- function(formula, data, subject,
     
     #--------------------------------------------------------------------------#
     
-    
-    n.groups <- prod(fl)
     WTS_out <- matrix(NA, ncol = 3, nrow = length(hypo_matrices))
     ATS_out <- matrix(NA, ncol = 4, nrow = length(hypo_matrices))
     WTPS_out <- matrix(NA, nrow = length(hypo_matrices), ncol = 3)
@@ -284,8 +246,8 @@ MANOVA <- function(formula, data, subject,
     colnames(quantiles) <- c("WTS_resampling", "MATS_resampling")
     # calculate results
     for (i in 1:length(hypo_matrices)) {
-      results <- MANOVA.Stat(data = response, n, hypo_matrices[[i]],
-                             iter, alpha, resampling, n.groups, p, CPU, seed)
+      results <- MANOVA.Stat.wide(Y, n, hypo_matrices[[i]],
+                             iter, alpha, resampling, CPU, seed)
       WTS_out[i, ] <- results$WTS
       ATS_out[i, ] <- results$ATS
       WTPS_out[i, ] <- results$WTPS
@@ -297,7 +259,8 @@ MANOVA <- function(formula, data, subject,
     mean_out <- matrix(results$Mean, ncol = p, byrow = TRUE)
     Var_out <- results$Cov
     descriptive <- cbind(lev_names, n, mean_out)
-    colnames(descriptive) <- c(nadat2, "n", paste(rep("Mean", p), 1:p))
+    colnames(descriptive) <- c(EF, "n", split3)
+    rownames(descriptive) <- NULL
     
     # Output ------------------------------------------------------
     colnames(WTS_out) <- cbind ("Test statistic", "df", "p-value")

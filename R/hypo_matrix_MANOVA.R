@@ -112,12 +112,9 @@ HN_MANOVA <- function(fl, p){
   }
   hypo <- vector("list", nf)
   if (nf == 2) {
-    fl[2] <- fl[2] / fl[1]
     hypo[[1]] <- P(fl[1]) %x% One(fl[2]) %x% diag(p)
     hypo[[2]] <- diag(fl[1]) %x% P(fl[2]) %x% diag(p)
   } else if (nf == 3) {
-    fl[3] <- fl[3] / fl[2]
-    fl[2] <- fl[2] / fl[1]
     hypo[[1]] <- P(fl[1]) %x% One(fl[2]) %x% One(fl[3]) %x% diag(p)
     hypo[[2]] <- diag(fl[1]) %x% P(fl[2]) %x% diag(fl[3]) %x% diag(p)
     hypo[[3]] <- diag(fl[1]) %x% diag(fl[2]) %x% P(fl[3]) %x% diag(p)
