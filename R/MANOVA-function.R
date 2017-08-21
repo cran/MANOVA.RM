@@ -39,7 +39,8 @@
 #'   p-values, the function also provides p-values based on resampling approaches.
 #'  
 #' @section NOTE: The number of resampling iterations has been set to 100 in the examples due to run time 
-#' restrictions on CRAN. Usually it is recommended to use at least 1000 iterations.
+#' restrictions on CRAN. Usually it is recommended to use at least 1000 iterations. 
+#' For more information and detailed examples also refer to the package vignette.
 #'     
 #' @return A \code{MANOVA} object containing the following components: 
 #'   \item{Descriptive}{Some descriptive statistics of the data for all factor 
@@ -139,7 +140,7 @@ MANOVA <- function(formula, data, subject,
     # one-way layout
     nr_hypo <- attr(terms(formula), "factors")
     fac_names <- colnames(nr_hypo)
-    dat2 <- dat2[order(dat2[, 2]), ]
+    dat2 <- dat2[order(dat2[, 2], dat2$subject), ]
     response <- dat2[, 1]    
     # contrast matrix
     hypo <- (diag(fl) - matrix(1 / fl, ncol = fl, nrow = fl)) %x% diag(p)
@@ -153,7 +154,7 @@ MANOVA <- function(formula, data, subject,
     rownames(WTS_out) <- fac_names
     rownames(ATS_out) <- fac_names
     names(WTPS_out) <- fac_names
-    results <- MANOVA.Stat(data = response, n = n, hypo, iter = iter, alpha, resampling, n.groups = fl, p, CPU, seed)    
+    results <- MANOVA.Stat(data = response, n = n, hypo, iter = iter, alpha, resampling, n.groups = fl, p, CPU, seed, nf)    
     WTS_out <- results$WTS
     ATS_out <- results$ATS
     MATS_out <- results$MATS
@@ -285,7 +286,7 @@ MANOVA <- function(formula, data, subject,
     # calculate results
     for (i in 1:length(hypo_matrices)) {
       results <- MANOVA.Stat(data = response, n, hypo_matrices[[i]],
-                             iter, alpha, resampling, n.groups, p, CPU, seed)
+                             iter, alpha, resampling, n.groups, p, CPU, seed, nf)
       WTS_out[i, ] <- results$WTS
       ATS_out[i, ] <- results$ATS
       WTPS_out[i, ] <- results$WTPS

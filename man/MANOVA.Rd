@@ -72,7 +72,8 @@ The MANOVA() function provides the Wald-type statistic (WTS) as well as
 }
 \section{NOTE}{
  The number of resampling iterations has been set to 100 in the examples due to run time 
-restrictions on CRAN. Usually it is recommended to use at least 1000 iterations.
+restrictions on CRAN. Usually it is recommended to use at least 1000 iterations. 
+For more information and detailed examples also refer to the package vignette.
 }
 \examples{
 data(EEG)

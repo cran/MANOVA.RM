@@ -1,6 +1,6 @@
 <!--
 %\VignetteEngine{knitr::rmarkdown}
-%\VignetteIndexEntry{An Introduction to MANOVA.RM}
+%\VignetteIndexEntry{MANOVA.RM}
 -->
 
 

@@ -206,7 +206,7 @@ hr {
 <body>
 <!--
 %\VignetteEngine{knitr::rmarkdown}
-%\VignetteIndexEntry{An Introduction to MANOVA.RM}
+%\VignetteIndexEntry{MANOVA.RM}
 -->
 
 <h2>Introduction</h2>
@@ -314,12 +314,12 @@ summary(model1)
 ## p-values resampling:
 ##                          Perm (WTS) Perm (ATS)
 ## Group                        0.0036         NA
-## Staphylococci                0.0001         NA
-## Group:Staphylococci          0.1270         NA
+## Staphylococci                0.0005         NA
+## Group:Staphylococci          0.1217         NA
 ## Time                         0.0000         NA
-## Group:Time                   0.0004         NA
-## Staphylococci:Time           0.1514         NA
-## Group:Staphylococci:Time     0.1566         NA
+## Group:Time                   0.0001         NA
+## Staphylococci:Time           0.1525         NA
+## Group:Staphylococci:Time     0.1494         NA
 </code></pre>
 
 <p>The output consists of four parts: <code>model1$Descriptive</code> gives an overview of the descriptive statistics: The number of observations, 
@@ -473,19 +473,19 @@ summary(EEG_model)
 ##                              WildBS (WTS) WildBS (ATS)
 ## sex                                 0.000        0.000
 ## diagnosis                           0.000        0.000
-## sex:diagnosis                       0.121        0.132
-## feature                             0.782        0.782
-## sex:feature                         0.139        0.139
-## diagnosis:feature                   0.065        0.263
-## sex:diagnosis:feature               0.473        0.381
-## region                              0.975        0.986
-## sex:region                          0.688        0.711
-## diagnosis:region                    0.180        0.335
-## sex:diagnosis:region                0.849        0.811
-## feature:region                      0.819        0.924
-## sex:feature:region                  0.878        0.955
-## diagnosis:feature:region            0.122        0.532
-## sex:diagnosis:feature:region        0.753        0.667
+## sex:diagnosis                       0.111        0.129
+## feature                             0.794        0.794
+## sex:feature                         0.174        0.174
+## diagnosis:feature                   0.067        0.253
+## sex:diagnosis:feature               0.428        0.345
+## region                              0.971        0.981
+## sex:region                          0.707        0.733
+## diagnosis:region                    0.171        0.310
+## sex:diagnosis:region                0.854        0.817
+## feature:region                      0.802        0.930
+## sex:feature:region                  0.884        0.949
+## diagnosis:feature:region            0.116        0.518
+## sex:diagnosis:feature:region        0.759        0.676
 </code></pre>
 
 <p>We find significant effects at level \(\alpha = 0.01\) of the whole-plot factors sex and diagnosis, while none of the sub-plot factors or interactions become significant.</p>
@@ -647,9 +647,9 @@ summary(fit)
 ## 
 ## p-values resampling:
 ##               paramBS (WTS) paramBS (ATS) paramBS (MATS)
-## rate                  0.003            NA          0.003
-## additive              0.030            NA          0.035
-## rate:additive         0.310            NA          0.277
+## rate                  0.003            NA          0.000
+## additive              0.022            NA          0.025
+## rate:additive         0.291            NA          0.262
 </code></pre>
 
 <h3>Confidence regions</h3>

@@ -63,7 +63,6 @@ fit <- MANOVA.wide(cbind(tear, gloss, opacity) ~ rate * additive,
 data = example, iter = 100, CPU = 1)
 summary(fit)
 
-
 }
 \seealso{
 \code{\link{MANOVA}}

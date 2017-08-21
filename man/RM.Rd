@@ -66,9 +66,21 @@ The RM() function provides the Wald-type
 \examples{
 data(o2cons)
 oxy <- RM(O2 ~ Group * Staphylococci * Time, data = o2cons, 
-            subject = "Subject", no.subf = 2, iter = 1000, resampling = "Perm", CPU = 1)
+            subject = "Subject", no.subf = 2, iter = 100, resampling = "Perm", CPU = 1)
 summary(oxy)
-plot(oxy, factor = "Group")
+plot(oxy, factor = "Group") 
+ 
+# For more details including the output of the examples also refer to the package vignette.
+
+# using the EEG data, consider additional within-subjects factors 'brain region' and 'feature'
+data(EEG)
+\dontrun{
+set.seed(987)
+EEG_model <- RM(resp ~ sex * diagnosis * feature * region, 
+               data = EEG, subject = "id", no.subf = 2, resampling = "WildBS",
+               iter = 1000,  alpha = 0.01, CPU = 1)
+summary(EEG_model)
+}
 
 }
 \references{

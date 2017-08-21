@@ -1,5 +1,5 @@
 ## function for calculating test statistics for MANOVA
-MANOVA.Stat<- function(data, n, hypo_matrix, iter, alpha, resampling, n.groups, p, CPU, seed){
+MANOVA.Stat<- function(data, n, hypo_matrix, iter, alpha, resampling, n.groups, p, CPU, seed, nf){
   
   N <- sum(n)
   H <- hypo_matrix
@@ -12,13 +12,26 @@ MANOVA.Stat<- function(data, n, hypo_matrix, iter, alpha, resampling, n.groups, 
     B <- diag(p) %x% t(rep(1 / n[ii], n[ii]))
     A <- magic::adiag(A, B)
   } 
+  
+  # nf = 1?
+  if (nf == 1){
+  A <-  t(rep(1 / n[1], n[1])) %x% diag(p)
+  for (ii in 2:length(n)){
+    B <- t(rep(1 / n[ii], n[ii])) %x% diag(p)
+    A <- magic::adiag(A, B)
+  }
+  }
   # -----------------------------------------------------#
+  
   means <- A %*% x
   
   V <- list(NA)
   n.temp <- cumsum(c(0, n))
   for (i in 1:n.groups){
     y <- matrix(x[(n.temp[i]*p+1):(n.temp[i+1]*p)], ncol = p)
+    if (nf == 1){
+    y <- matrix(x[(n.temp[i]*p+1):(n.temp[i+1]*p)], ncol = p, byrow = TRUE)
+    }
     V[[i]] <- 1 / n[i] * cov(y)
   }
   
