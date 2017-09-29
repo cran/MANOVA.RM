@@ -16,20 +16,23 @@
 #'   statistic. The default option is 10,000.
 #' @param alpha A number specifying the significance level; the default is 0.05.
 #' @param resampling The resampling method to be used, one of "Perm" (randomly permute 
-#'    all observations), "paramBS" (parametric bootstrap approach) and "WildBS" (wild bootstrap
-#'    approach with Rademacher weights). Except for the Wild Bootstrap, all methods are applied
-#'    to the WTS only.
+#'    all observations), "paramBS" (parametric bootstrap approach) and "WildBS" 
+#'    (wild bootstrap approach with Rademacher weights). Except for the Wild Bootstrap,
+#'    all methods are applied to the WTS only.
 #' @param CPU The number of cores used for parallel computing. If omitted, cores are
 #'   detected via \code{\link[parallel]{detectCores}}.
 #' @param seed A random seed for the resampling procedure. If omitted, no 
 #'   reproducible seed is set.
+#' @param CI.method The method for calculating the quantiles used for the confidence intervals, 
+#'  either "t-quantile" (the default) or "resampling" (the quantile of the resampled WTS).
+#' @param dec Number of decimals the results should be rounded to. Default is 3.
 #'   
 #' @details The RM() function provides the Wald-type
 #'  statistic as well as the ANOVA-type statistic for repeated measures designs
 #'  with metric data as described in Friedrich et al. (2017).
 #'  These are even applicable for non-normal error terms and/or heteroscedastic
-#'  variances. It is implemented for designs with an arbitrary number of whole-plot and sub-plot
-#'  factors and allows for different sample sizes. In addition to the
+#'  variances. It is implemented for designs with an arbitrary number of whole-plot 
+#'  and sub-plot factors and allows for different sample sizes. In addition to the
 #'  asymptotic p-values, it also provides p-values based on resampling
 #'  approaches.
 #'   
@@ -39,10 +42,13 @@
 #'   level combination, the mean and 100*(1-alpha)\% confidence
 #'   intervals (based on t-quantiles).}
 #'  \item{Covariance}{The estimated covariance matrix.} 
-#'  \item{WTS}{The value of the WTS along with degrees of freedom of the central chi-square distribution and 
+#'  \item{WTS}{The value of the WTS along with degrees of freedom of the central 
+#'  chi-square distribution and 
 #'   corresponding p-value.}
-#'  \item{ATS}{The value of the ATS, degrees of freedom of the central F distribution and the corresponding p-value.}
-#'  \item{resampling}{p-values for the test statistics based on the chosen resampling approach.}
+#'  \item{ATS}{The value of the ATS, degrees of freedom of the central F distribution 
+#'  and the corresponding p-value.}
+#'  \item{resampling}{p-values for the test statistics based on the chosen resampling
+#'   approach.}
 #' 
 #' @examples data(o2cons)
 #' oxy <- RM(O2 ~ Group * Staphylococci * Time, data = o2cons, 
@@ -50,28 +56,32 @@
 #' summary(oxy)
 #' plot(oxy, factor = "Group") 
 #'  
-#' # For more details including the output of the examples also refer to the package vignette.
+#' # For more details including the output of the examples also refer to the 
+#' # package vignette.
 #' 
-#' # using the EEG data, consider additional within-subjects factors 'brain region' and 'feature'
+#' # using the EEG data, consider additional within-subjects factors 'brain region' 
+#' # and 'feature'
 #' data(EEG)
 #' \dontrun{
-#' set.seed(987)
 #' EEG_model <- RM(resp ~ sex * diagnosis * feature * region, 
 #'                data = EEG, subject = "id", no.subf = 2, resampling = "WildBS",
-#'                iter = 1000,  alpha = 0.01, CPU = 4)
+#'                iter = 1000,  alpha = 0.01, CPU = 4, seed = 987, dec = 2)
 #' summary(EEG_model)
 #' }
 #' 
 #' @seealso \code{\link[GFD]{GFD}}, \code{\link[nparLD]{nparLD}}, \code{\link{MANOVA}}
 #' 
-#' @references Friedrich, S., Brunner, E. and Pauly, M. (2017). Permuting longitudinal data
-#'  in spite of the dependencies. Journal of Multivariate Analysis, 153, 255-265.
+#' @references Friedrich, S., Brunner, E. and Pauly, M. (2017). Permuting longitudinal
+#'  data in spite of the dependencies. Journal of Multivariate Analysis, 153, 255-265.
 #' 
-#'  Bathke, A., Friedrich, S., Konietschke, F., Pauly, M., Staffen, W., Strobl, N. and Hoeller, Y. (2016). Using EEG, SPECT, and Multivariate Resampling Methods
-#' to Differentiate Between Alzheimer's and other Cognitive Impairments. arXiv preprint arXiv:1606.09004
+#'  Bathke, A., Friedrich, S., Konietschke, F., Pauly, M., Staffen, W., Strobl, N.
+#'   and Hoeller, Y. (2016). Using EEG, SPECT, and Multivariate Resampling Methods
+#'   to Differentiate Between Alzheimer's and other Cognitive Impairments. 
+#'   arXiv preprint arXiv:1606.09004
 #' 
-#' Friedrich, S., Konietschke, F., Pauly, M.(2016). GFD - An R-package
-#' for the Analysis of General Factorial Designs. Accepted for publication in Journal of Statistical Software.
+#'   Friedrich, S., Konietschke, F., Pauly, M. (2017). GFD - An 
+#'   R-package for the Analysis of General Factorial Designs. 
+#'   Journal of Statistical Software, 79(1), 1-18.
 #' 
 #'
 #' @importFrom graphics axis legend par plot title
@@ -84,16 +94,20 @@
 #' @export
 
 RM <- function(formula, data, subject,
-                   no.subf = 1, iter = 10000, alpha = 0.05, resampling = "Perm", CPU, seed){
+               no.subf = 1, iter = 10000, alpha = 0.05, resampling = "Perm",
+               CPU, seed, CI.method = "t-quantile", dec = 3){
   
-  if (!(resampling %in% c("Perm", "paramBS", "WildBS"))){
-    stop("Resampling must be one of 'Perm', 'paramBS' or 'WildBS'!")
+   if (!(resampling %in% c("Perm", "paramBS", "WildBS"))){
+     stop("Resampling must be one of 'Perm', 'paramBS' or 'WildBS'!")
+   }
+    
+  if (!(CI.method %in% c("t-quantile", "resampling"))){
+    stop("CI.method must be one of 't-quantile' or 'resampling'!")
   }
   
   input_list <- list(formula = formula, data = data,
                      subject = subject, 
                      iter = iter, alpha = alpha, resampling = resampling)
-  
   
   test1 <- hasArg(CPU)
   if(!test1){
@@ -104,7 +118,6 @@ RM <- function(formula, data, subject,
   if(!test2){
     seed <- 0
   }
-  
   
   dat <- model.frame(formula, data)
   if (!(subject %in% names(data))){
@@ -140,13 +153,14 @@ RM <- function(formula, data, subject,
     rownames(WTS_out) <- fac_names
     rownames(ATS_out) <- fac_names
     names(WTPS_out) <- fac_names
-    results <- RM.Stat.oneway(data = response, n = n, t = fl, hypo, iter = iter, alpha, resampling, seed)
-    WTS_out <- results$WTS
-    ATS_out <- results$ATS
-    WTPS_out <- results$WTPS
-    mean_out <- results$Mean
-    Var_out <- results$Cov
-    CI <- results$CI
+    results <- RM.Stat.oneway(data = response, n = n, t = fl, hypo, iter = iter, 
+                              alpha, resampling, seed, CI.method)
+    WTS_out <- round(results$WTS, dec)
+    ATS_out <- round(results$ATS, dec)
+    WTPS_out <- round(results$WTPS, dec)
+    mean_out <- round(results$Mean, dec)
+    Var_out <- round(results$Cov, dec)
+    CI <- round(results$CI, dec)
     colnames(CI) <- c("CIl", "CIu")
     descriptive <- cbind(lev_names, n, mean_out, CI)
     colnames(descriptive) <- c(nadat2, "n", "Means",
@@ -169,7 +183,7 @@ RM <- function(formula, data, subject,
     # end one-way layout ------------------------------------------------------
   } else {
     # no. of whole-plot (groups) and sub-plot (sub) factors
-    dat2 <- dat2[do.call(order, dat2[, 2:(nf + 1)]), ]
+    dat2 <- dat2[do.call(order, dat2[, 2:(nf + 2)]), ]
     n.whole <- nf - no.subf
     lev_names <- lev_names[do.call(order, lev_names[, 1:nf]), ]
     response <- dat2[, 1]
@@ -226,23 +240,25 @@ RM <- function(formula, data, subject,
     if (n.whole == 0 && nf !=1) {
       for (i in 1:length(hypo_matrices)) {
         results <- RM.Stat.sub(data = response, nind = nind[1], n, hypo_matrices[[i]],
-                               iter, alpha, n.sub, n.groups, resampling, seed)
-        WTS_out[i, ] <- results$WTS
-        ATS_out[i, ] <- results$ATS
-        WTPS_out[i, ] <- results$WTPS
+                               iter, alpha, n.sub, n.groups, resampling, seed, CI.method)
+        WTS_out[i, ] <- round(results$WTS, dec)
+        ATS_out[i, ] <- round(results$ATS, dec)
+        WTPS_out[i, ] <- round(results$WTPS, dec)
       }
     } else {  
       for (i in 1:length(hypo_matrices)) {
         results <- RM.Stat(data = response, nind, n, hypo_matrices[[i]],
-                           iter, alpha, iii = i, whole_count, n.sub, n.groups, resampling, CPU, seed)
-        WTS_out[i, ] <- results$WTS
-        ATS_out[i, ] <- results$ATS
-        WTPS_out[i, ] <- results$WTPS
+                           iter, alpha, iii = i, whole_count, n.sub, n.groups, 
+                           resampling, CPU, seed, CI.method)
+        WTS_out[i, ] <- round(results$WTS, dec)
+        ATS_out[i, ] <- round(results$ATS, dec)
+        WTPS_out[i, ] <- round(results$WTPS, dec)
+       # quant[i] <- results$quantile
       }
     }
-    mean_out <- results$Mean
-    Var_out <- results$Cov
-    CI <- results$CI
+    mean_out <- round(results$Mean, dec)
+    Var_out <- round(results$Cov, dec)
+    CI <- round(results$CI, dec)
     colnames(CI) <- c("CIl", "CIu")
     descriptive <- cbind(lev_names, n, mean_out, CI)
     colnames(descriptive) <- c(nadat2, "n", "Means",
@@ -261,6 +277,7 @@ RM <- function(formula, data, subject,
       n_groups[[i]] <- c(by(dat2[, 1], dat2[, i + 1], length))
       lower[[i]] <- mu[[i]] - sqrt(sigma[[i]] / n_groups[[i]]) *
         qt(1 - alpha / 2, df = n_groups[[i]])
+      # HIER NUR t-QUANTIL
       upper[[i]] <- mu[[i]] + sqrt(sigma[[i]] / n_groups[[i]]) *
         qt(1 - alpha / 2, df = n_groups[[i]])
     }
@@ -275,8 +292,11 @@ RM <- function(formula, data, subject,
     output$WTS <- WTS_out
     output$ATS <- ATS_out
     output$resampling <- WTPS_out
-    output$plotting <- list(levels, fac_names, nf, no.subf, mu, lower, upper, fac_names_original, dat2, fl, alpha, nadat2, lev_names)
-    names(output$plotting) <- c("levels", "fac_names", "nf", "no.subf", "mu", "lower", "upper", "fac_names_original", "dat2", "fl", "alpha", "nadat2", "lev_names")
+    output$plotting <- list(levels, fac_names, nf, no.subf, mu, lower, upper,
+                            fac_names_original, dat2, fl, alpha, nadat2, lev_names)
+    names(output$plotting) <- c("levels", "fac_names", "nf", "no.subf", "mu",
+                                "lower", "upper", "fac_names_original", "dat2", "fl",
+                                "alpha", "nadat2", "lev_names")
   }
   class(output) <- "RM"
   return(output)

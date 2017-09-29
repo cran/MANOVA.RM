@@ -1,4 +1,4 @@
-#' A graphical user interface for the MANOVA() function
+#' A graphical user interface for the MANOVA.wide() function
 #' 
 #' This function provides a graphical user interface for calculating statistical
 #' tests for multivariate data.
@@ -6,8 +6,7 @@
 #' The function produces a GUI for the calculation of the test statistics.
 #' Data can be loaded via the "load data" button. The formula, 
 #' number of resampling iterations (default: 10,000) and the significance level alpha
-#' (default: 0.05) need to be specified. Furthermore, the column name specifying the subjects in the
-#' data needs to be provided.
+#' (default: 0.05) need to be specified.
 #' For the resampling methods, the user can choose between a parametric bootstrap approach 
 #' (see e.g. Konietschke et al. (2015)) and a Wild bootstrap using Rademacher weights
 #' (see e.g. Bathke et al. (2016)).
@@ -15,7 +14,7 @@
 #' 
 #' @export
 
-GUI.MANOVA <- function() {
+GUI.MANOVAwide <- function() {
   requireNamespace("RGtk2", quietly = TRUE)
   if(!("package:RGtk2" %in% search())){attachNamespace("RGtk2")}
   ## Run on "Load"
@@ -33,21 +32,20 @@ GUI.MANOVA <- function() {
     the.formula <- formula(filename1$getText())
     the.perm <- as.numeric(filename2$getText())
     the.alpha <- as.numeric(filename3$getText())
-    the.subject <- filename5$getText()
     the.res <- c("paramBS", "WildBS")[comboboxresampling$active+1]
     the.sep <- sepEntry$getText()
     the.headers <- headersEntry$active
     the.dec <- decEntry$getText()
     d <- read.table(the.file, sep = the.sep, header = the.headers,
                     dec = the.dec)
-    res <- MANOVA(the.formula, d, subject = the.subject,
+    res <- MANOVA.wide(the.formula, d, 
                   iter = the.perm, alpha = the.alpha, resampling = the.res)
     summary(res)
   }
   # Create window
   window <- RGtk2::gtkWindow()
   # Add title
-  window["title"] <- "Tests for multivariate data"
+  window["title"] <- "Tests for multivariate data in wide format"
   # Add a frame
   frame <- RGtk2::gtkFrameNew("Specify data location and formula...")
   window$add(frame)
@@ -93,14 +91,7 @@ GUI.MANOVA <- function() {
   filename3$setText(0.05)
   label3$setMnemonicWidget(filename3)
   hbox$packStart(filename3, FALSE, FALSE, 0)
-  label5 <- RGtk2::gtkLabelNewWithMnemonic("_subject")
-  hbox$packStart(label5, FALSE, FALSE, 0)
-  # Add entry in the second column; named "filename5"
-  filename5 <- RGtk2::gtkEntryNew()
-  filename5$setWidthChars(10)
-  label5$setMnemonicWidget(filename5)
-  hbox$packStart(filename5, FALSE, FALSE, 0)
-  
+  # resampling method
   labelresampling <- RGtk2::gtkLabelNewWithMnemonic("Resampling Method")
   hbox$packStart(labelresampling,FALSE,FALSE,0)
   resampling <- RGtk2::rGtkDataFrame(c("paramBS", "WildBS"))

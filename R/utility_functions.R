@@ -1,6 +1,7 @@
+xaxt <- NULL
 #' @export 
 plot.RM <- function (x, ...) {
- 
+  
   object <- x
   dots <- list(...)
   a <- object$plotting
@@ -18,23 +19,36 @@ plot.RM <- function (x, ...) {
       }
     } else {
       Faktor <- dots$factor
-    } 
-    x.label <- ""
+    }
   } else {
     Faktor <- fac.names
-    x.label <- fac.names
   }
   
   match.arg(Faktor, fac.names)
+  h <- helper(a, b, Faktor)
   
+  # to automatically create axis if not specified by user
+   exist2 <- hasArg(xaxt)
+   ax <- TRUE
+   if(exist2){
+     ax <- FALSE
+   }
+  
+  if(!(hasArg(gap))){
+    gap <- 0.1
+  } else {
+    gap <- dots$gap
+  }
+  
+  xmax <- ncol(h$y)+ nrow(h$y)*gap
   # default values
-  args <- list(plot.object = a, descr.object = b, factor = Faktor,
-               lwd =2, ylab = "Means", xlab = x.label, col = 1:length(fac.names), pch = 1:18, legendpos = "topright")
+  args <- list(h,
+               lwd = 2, ylab = "Means", xlab = h$xlab, col = 1:length(fac.names),
+               pch = 1:18, legendpos = "topright", xlim = c(0.8, xmax + 0.1),
+               ylim =c(min(h$li), max(h$ui)), gap = 0.1, xaxt = "n", ax)
   
   args[names(dots)] <- dots
-  
-  do.call(plotting, args = args)
-  
+  do.call(newplotting, args = args)
 }
 
 #' @export
@@ -44,8 +58,8 @@ print.MANOVA <- function(x, ...) {
   print(a$formula)
   cat("\n", "Wald-Type Statistic (WTS):", "\n", sep = "")
   print(x$WTS)
-  cat("\n", "ANOVA-Type Statistic (ATS):", "\n", sep = "")
-  print(x$ATS)
+  # cat("\n", "ANOVA-Type Statistic (ATS):", "\n", sep = "")
+  #  print(x$ATS)
   cat("\n", "modified ANOVA-Type Statistic (MATS):", "\n", sep = "")
   print(x$MATS)
   cat("\n", "p-values resampling:", "\n", sep = "")
@@ -62,8 +76,6 @@ summary.MANOVA <- function (object, ...) {
   print(object$Descriptive)
   cat("\n", "Wald-Type Statistic (WTS):", "\n", sep = "")
   print(object$WTS)
-  cat("\n", "ANOVA-Type Statistic (ATS):", "\n", sep = "")
-  print(object$ATS)
   cat("\n", "modified ANOVA-Type Statistic (MATS):", "\n", sep = "")
   print(object$MATS)
   cat("\n", "p-values resampling:", "\n", sep = "")
@@ -96,4 +108,9 @@ summary.RM <- function (object, ...) {
   print(object$ATS)
   cat("\n", "p-values resampling:", "\n", sep = "")
   print(object$resampling)
+}
+
+#' @export 
+plot.MANOVA <- function(x, ...){
+  stop("There is no plotting routine for MANOVA objects.")
 }

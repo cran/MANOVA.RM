@@ -1,7 +1,7 @@
 #' Tests for Multivariate Data in Semi-Parametric Factorial Designs
 #' 
-#' The MANOVA.wide function calculates the Wald-type statistic (WTS), the ANOVA-type 
-#' statistic (ATS) and a modified ATS (MATS) as well as resampling versions of 
+#' The MANOVA.wide function calculates the Wald-type statistic (WTS)
+#'  and a modified ANOVA-type statistic (MATS) as well as resampling versions of 
 #' these test statistics for 
 #' semi-parametric multivariate data provided in wide format.
 #' 
@@ -24,6 +24,7 @@
 #'   are labeled uniquely or not. Default is FALSE, i.e., the levels of the nested 
 #'   factor are the same for each level of the main factor. For an example and more explanations
 #'   see the GFD package and the corresponding vignette.
+#' @param dec Number of decimals the results should be rounded to. Default is 3.
 #'  
 #' @section NOTE: The number of resampling iterations has been set to 100 in the examples due to run time 
 #' restrictions on CRAN. Usually it is recommended to use at least 1000 iterations.
@@ -51,7 +52,7 @@
 
 MANOVA.wide <- function(formula, data,
                    iter = 10000, alpha = 0.05, resampling = "paramBS", CPU,
-                   seed, nested.levels.unique = FALSE){
+                   seed, nested.levels.unique = FALSE, dec = 3){
   
   if (!(resampling %in% c("paramBS", "WildBS"))){
     stop("Resampling must be one of 'paramBS' and 'WildBS'!")
@@ -106,34 +107,29 @@ MANOVA.wide <- function(formula, data,
     hypo <- (diag(fl) - matrix(1 / fl, ncol = fl, nrow = fl)) %x% diag(p)
     
     WTS_out <- matrix(NA, ncol = 3, nrow = 1)
-    ATS_out <- matrix(NA, ncol = 4, nrow = 1)
     MATS_out <- NA
-    WTPS_out <- rep(NA, 3)
+    WTPS_out <- rep(NA, 2)
     quantiles <- matrix(NA, 2, 1)
     rownames(WTS_out) <- fac_names
-    rownames(ATS_out) <- fac_names
     names(WTPS_out) <- fac_names
     results <- MANOVA.Stat.wide(Y, n = n, hypo, iter = iter, alpha, resampling, CPU, seed)    
-    WTS_out <- results$WTS
-    ATS_out <- results$ATS
-    MATS_out <- results$MATS
-    WTPS_out <- results$WTPS
+    WTS_out <- round(results$WTS, dec)
+    MATS_out <- round(results$MATS, dec)
+    WTPS_out <- round(results$WTPS, dec)
     quantiles <- results$quantiles
     names(quantiles) <- c("WTS_resampling", "MATS_resampling")
-    mean_out <- matrix(results$Mean, ncol = p, byrow = TRUE)
+    mean_out <- matrix(round(results$Mean, dec), ncol = p, byrow = TRUE)
     Var_out <- results$Cov
     descriptive <- cbind(lev_names, n, mean_out)
     colnames(descriptive) <- c(EF, "n", split3)  
     names(WTS_out) <- cbind ("Test statistic", "df",
                              "p-value")
-    names(ATS_out) <- cbind("Test statistic", "df1", "df2", "p-value")
-    names(WTPS_out) <- cbind(paste(resampling, "(WTS)"), paste(resampling, "(ATS)"), paste(resampling, "(MATS)"))
+    names(WTPS_out) <- cbind(paste(resampling, "(WTS)"), paste(resampling, "(MATS)"))
     output <- list()
     output$input <- input_list
     output$Descriptive <- descriptive
     output$Covariance <- Var_out
     output$WTS <- WTS_out
-    output$ATS <- ATS_out
     output$MATS <- MATS_out
     output$resampling <- WTPS_out
     output$quantile <- quantiles
@@ -150,8 +146,10 @@ MANOVA.wide <- function(formula, data,
    
     Y <- split(dat2, fac.groups, lex.order = TRUE)
     n <- sapply(Y, nrow)
-
-    if (length(fac_names) == nf) {
+    
+    nested <- grepl(":", formula)
+    
+    if (sum(nested) > 0) {
       # nested
       
       # if nested factor is named uniquely
@@ -214,7 +212,7 @@ MANOVA.wide <- function(formula, data,
            not implemented!")
     }
     # only 3-way nested designs are possible
-    if (length(fac_names) == nf && nf >= 4) {
+    if (sum(nested) > 0 && nf >= 4) {
       stop("Four- and higher way nested designs are
            not implemented!")
     }
@@ -224,38 +222,30 @@ MANOVA.wide <- function(formula, data,
            with less than 2 observations!")
     }
     
-    if (length(fac_names) != length(hypo_matrices)) {
-      stop("Something is wrong: Perhaps a missing interaction term in formula?")
-    }
-    
     #--------------------------------------------------------------------------#
     
     WTS_out <- matrix(NA, ncol = 3, nrow = length(hypo_matrices))
-    ATS_out <- matrix(NA, ncol = 4, nrow = length(hypo_matrices))
-    WTPS_out <- matrix(NA, nrow = length(hypo_matrices), ncol = 3)
+    WTPS_out <- matrix(NA, nrow = length(hypo_matrices), ncol = 2)
     MATS_out <- matrix(NA, nrow = length(hypo_matrices), ncol = 1)
     quantiles <- matrix(NA, ncol = 2, nrow = length(hypo_matrices))
     rownames(WTS_out) <- fac_names
-    rownames(ATS_out) <- fac_names
     rownames(WTPS_out) <- fac_names
     rownames(MATS_out) <- fac_names
     rownames(quantiles) <- fac_names
-    colnames(ATS_out) <- c("Test statistic", "df1", "df2", "p-value")
     colnames(MATS_out) <- "Test statistic"
     colnames(quantiles) <- c("WTS_resampling", "MATS_resampling")
     # calculate results
     for (i in 1:length(hypo_matrices)) {
       results <- MANOVA.Stat.wide(Y, n, hypo_matrices[[i]],
                              iter, alpha, resampling, CPU, seed)
-      WTS_out[i, ] <- results$WTS
-      ATS_out[i, ] <- results$ATS
-      WTPS_out[i, ] <- results$WTPS
-      MATS_out[i] <- results$MATS
+      WTS_out[i, ] <- round(results$WTS, dec)
+      WTPS_out[i, ] <- round(results$WTPS, dec)
+      MATS_out[i] <- round(results$MATS, dec)
       quantiles[i, ] <- results$quantiles
     }
     # time needed for resampling calculations
     time <- results$time
-    mean_out <- matrix(results$Mean, ncol = p, byrow = TRUE)
+    mean_out <- matrix(round(results$Mean, dec), ncol = p, byrow = TRUE)
     Var_out <- results$Cov
     descriptive <- cbind(lev_names, n, mean_out)
     colnames(descriptive) <- c(EF, "n", split3)
@@ -263,7 +253,7 @@ MANOVA.wide <- function(formula, data,
     
     # Output ------------------------------------------------------
     colnames(WTS_out) <- cbind ("Test statistic", "df", "p-value")
-    colnames(WTPS_out) <- cbind(paste(resampling, "(WTS)"), paste(resampling, "(ATS)"), paste(resampling, "(MATS)"))
+    colnames(WTPS_out) <- cbind(paste(resampling, "(WTS)"), paste(resampling, "(MATS)"))
     output <- list()
     output$time <- time
     output$input <- input_list
@@ -272,14 +262,12 @@ MANOVA.wide <- function(formula, data,
     output$Means <- mean_out
     output$MATS <- MATS_out
     output$WTS <- WTS_out
-    output$ATS <- ATS_out
     output$resampling <- WTPS_out
     output$quantile <- quantiles
     output$nf <- nf
     output$H <- hypo_matrices
     output$factors <- fac_names
     output$p <- p
-    output$fl <- fl
   }
   class(output) <- "MANOVA"
   return(output)

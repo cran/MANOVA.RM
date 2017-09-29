@@ -1,3 +1,4 @@
+# still used for plotting via GUI
 plotting <- function(plot.object, descr.object, factor, col, pch, legendpos, ...){
   
   nf <- plot.object$nf
@@ -45,8 +46,6 @@ plotting <- function(plot.object, descr.object, factor, col, pch, legendpos, ...
       fac_names_twofold <- fac_names_twofold[1:choose(nf, 2)]
       
       if (factor %in% fac_names_twofold) {
-        
-        
         fak1 <- Faktor[1]
         fak2 <- Faktor[2]
         posi <- which(fac_names_original[1:nf] == fak1)
@@ -68,7 +67,7 @@ plotting <- function(plot.object, descr.object, factor, col, pch, legendpos, ...
                         nmu[1, ],
                         li = nlower[1, ],
                         ui = nupper[1, ], xlim = c(0.8, (dim(nmu)[2] + 0.3)),
-                        ylim = c(min(nlower) - 1, max(nupper) + 1),
+                        ylim = c(min(nlower), max(nupper)),
                         col = color[1], pch = pch[1], xaxt = "n", ...)
         axis(side = 1, at = (1:1:dim(nmu)[2]),
              labels = unlist(levels[posi2]), ...)
@@ -86,7 +85,6 @@ plotting <- function(plot.object, descr.object, factor, col, pch, legendpos, ...
           
       } else if (length(Faktor) == 3) {
         # three-way plots
-        
         fak1 <- Faktor[1]
         fak2 <- Faktor[2]
         fak3 <- Faktor[3]

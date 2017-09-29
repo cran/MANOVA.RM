@@ -67,8 +67,9 @@
 #'   \item{complexity_frontal}{EEG measurements for complexity in frontal regions}
 #'   \item{complexity_central}{EEG measurements for complexity in central regions}
 #'   \item{sex}{sex of the patient}
-#'   \item{age}{age of the patient, coded as 0 for less than 70 years and 1 for \eqn{>= 70} years}
+#'   \item{age}{age of the patient}
 #'   \item{diagnosis}{neuropsychological diagnosis, AD for Alzheimer's Disease, MCI for mild cognitive impairment or SCC for subjective cognitive complaints without clinically significant deficits}
+#'   \item{AgeGroup}{categorized age, coded as 0 for less than 70 years and 1 for \eqn{>= 70} years}
 #' }
 #' 
 #' @usage data(EEGwide)

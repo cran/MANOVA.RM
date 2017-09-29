@@ -5,7 +5,8 @@
 \title{Tests for Multivariate Data in Semi-Parametric Factorial Designs}
 \usage{
 MANOVA(formula, data, subject, iter = 10000, alpha = 0.05,
-  resampling = "paramBS", CPU, seed, nested.levels.unique = FALSE)
+  resampling = "paramBS", CPU, seed, nested.levels.unique = FALSE,
+  dec = 3)
 }
 \arguments{
 \item{formula}{A model \code{\link{formula}} object. The left hand side 
@@ -24,7 +25,7 @@ statistic. The default option is 10,000.}
 
 \item{resampling}{The resampling method to be used, one of "paramBS"
 (parametric bootstrap approach) and "WildBS" (wild bootstrap approach with
-Rademacher weights). The Wild Bootstrap is calculated for all test statistics.}
+Rademacher weights).}
 
 \item{CPU}{The number of cores used for parallel computing. If omitted, cores are
 detected via \code{\link[parallel]{detectCores}}.}
@@ -36,6 +37,8 @@ reproducible seed is set.}
 are labeled uniquely or not. Default is FALSE, i.e., the levels of the nested 
 factor are the same for each level of the main factor. For an example and more explanations
 see the GFD package and the corresponding vignette.}
+
+\item{dec}{Number of decimals the results should be rounded to. Default is 3.}
 }
 \value{
 A \code{MANOVA} object containing the following components: 
@@ -45,26 +48,23 @@ A \code{MANOVA} object containing the following components:
   \item{Covariance}{The estimated covariance matrix.} 
   \item{WTS}{The value of the WTS along with degrees of freedom of the
   central chi-square distribution and p-value.} 
-  \item{ATS}{The value of the
-  ATS, degrees of freedom of the central F distribution and the corresponding
-  p-value.}
   \item{MATS}{The value of the MATS.} 
   \item{resampling}{p-values for the test statistic based on the
   chosen resampling approach.}
 }
 \description{
-The MANOVA function calculates the Wald-type statistic (WTS), the ANOVA-type 
-statistic (ATS) and a modified ATS (MATS) as well as resampling versions of 
+The MANOVA function calculates the Wald-type statistic (WTS) and a modified ANOVA-type 
+statistic (MATS) as well as resampling versions of 
 these test statistics for 
 semi-parametric multivariate data.
 }
 \details{
 The MANOVA() function provides the Wald-type statistic (WTS) as well as
-  the ANOVA-type statistic (ATS) for multivariate designs with metric data as described in 
-  Konietschke et al. (2015). Furthermore, it contains a modified ATS (MATS), which is invariant
+  the modified ANOVA-type statistic (MATS) for multivariate designs with metric data as described in 
+  Konietschke et al. (2015) and Friedrich and Pauly (2017), respectively. The MATS is invariant
   under scale transformations of the components and applicable to designs with singular covariance
-  matrices, see Friedrich and Pauly (2017) for details.
-  These tests are even applicable for non-normal error terms, 
+  matrices.
+  Both tests are applicable for non-normal error terms, 
   different sample sizes and/or heteroscedastic variances.
   They are implemented for designs with an arbitrary number of
   crossed factors or for nested designs. In addition to the asymptotic
@@ -95,9 +95,9 @@ Konietschke, F., Bathke, A. C., Harrar, S. W. and Pauly, M. (2015).
    Using EEG, SPECT, and Multivariate Resampling Methods
    to Differentiate Between Alzheimer's and other Cognitive Impairments. arXiv preprint arXiv:1606.09004.
   
-  Friedrich, S., Konietschke, F., Pauly, M. (2016). GFD - An 
-  R-package for the Analysis of General Factorial Designs. Accepted for publication in 
-  Journal of Statistical Software.
+  Friedrich, S., Konietschke, F., Pauly, M. (2017). GFD - An 
+  R-package for the Analysis of General Factorial Designs. 
+  Journal of Statistical Software, 79(1), 1-18.
   
   Friedrich, S., and Pauly, M. (2017). MATS: Inference for potentially singular and
   heteroscedastic MANOVA. arXiv preprint arXiv:1704.03731.

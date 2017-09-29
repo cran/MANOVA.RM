@@ -5,7 +5,8 @@
 \title{Tests for Multivariate Data in Semi-Parametric Factorial Designs}
 \usage{
 MANOVA.wide(formula, data, iter = 10000, alpha = 0.05,
-  resampling = "paramBS", CPU, seed, nested.levels.unique = FALSE)
+  resampling = "paramBS", CPU, seed, nested.levels.unique = FALSE,
+  dec = 3)
 }
 \arguments{
 \item{formula}{A model \code{\link{formula}} object. The left hand side 
@@ -34,13 +35,15 @@ reproducible seed is set.}
 are labeled uniquely or not. Default is FALSE, i.e., the levels of the nested 
 factor are the same for each level of the main factor. For an example and more explanations
 see the GFD package and the corresponding vignette.}
+
+\item{dec}{Number of decimals the results should be rounded to. Default is 3.}
 }
 \value{
 See \code{\link{MANOVA}}
 }
 \description{
-The MANOVA.wide function calculates the Wald-type statistic (WTS), the ANOVA-type 
-statistic (ATS) and a modified ATS (MATS) as well as resampling versions of 
+The MANOVA.wide function calculates the Wald-type statistic (WTS)
+ and a modified ANOVA-type statistic (MATS) as well as resampling versions of 
 these test statistics for 
 semi-parametric multivariate data provided in wide format.
 }

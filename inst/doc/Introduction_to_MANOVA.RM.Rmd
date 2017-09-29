@@ -8,7 +8,7 @@
 
 This vignette documents the use of the `MANOVA.RM` package for the analysis of semi-parametric repeated measures designs and multivariate data. 
 The package consists of two parts - one for repeated measurements and one for multivariate data - which will be explained in detail below. Both functions calculate the Wald-type statistic 
-(WTS) and the ANOVA-type statistic (ATS) based on means. These test statistics can be used for arbitrary semi-parametric designs, even with unequal covariance matrices among groups
+(WTS) as well as the ANOVA-type statistic (ATS) for repeated measures and a modification thereof (MATS) for multivariate data based on means. These test statistics can be used for arbitrary semi-parametric designs, even with unequal covariance matrices among groups
 and small sample sizes.
 Furthermore, different resampling approaches are provided in order to improve the
 small sample behavior of the test statistics. 
@@ -41,6 +41,7 @@ head(o2cons)
 
 We will now analyze this data using the `RM` function.
 The `RM` function takes as arguments:
+
 * `formula`: A formula consisting of the outcome variable on the left hand side of a \~ operator and the factor
 variables of interest on the right hand side. An interaction term must be specified. The time variable must be the last factor in the formula.
 * `data`: A data.frame, list or environment containing the variables in `formula`.
@@ -52,23 +53,26 @@ variables of interest on the right hand side. An interaction term must be specif
 set to 'Perm'.
 * `CPU`: The number of cores used for parallel computing. If omitted, cores are detected via \code{\link[parallel]{detectCores}}.
 * `seed`: A random seed for the resampling procedure. If omitted, no reproducible seed is set.
+* `CI.method`: The method for calculating the quantiles used for the confidence intervals, 
+  either 't-quantile' (the default) or 'resampling' (based on quantile of the resampled WTS).
+* `dec`: The number of decimals the results should be rounded to. Default is 3.
 
 ```{r}
 model1 <- RM(O2 ~ Group * Staphylococci * Time, data = o2cons, 
-             subject = "Subject", no.subf = 2, iter = 10000, 
+             subject = "Subject", no.subf = 2, iter = 1000, 
              resampling = "Perm", CPU = 1, seed = 1234)
 summary(model1)
 ```
 
 The output consists of four parts: `model1$Descriptive` gives an overview of the descriptive statistics: The number of observations, 
-mean and confidence intervals (based on quantiles of the t-distribution) are displayed for each factor level combination.
+mean and confidence intervals (based on either quantiles of the t-distribution or the resampling-based quantiles) are displayed for each factor level combination.
 `model1$WTS` contains the results for the Wald-type test: The test statistic, degree of freedom and p-values based on the asymptotic \(\chi^2\) distribution
 are displayed. Note that the $\chi^2$ approximation is very liberal for small sample sizes.
 `model1$ATS` contains the corresponding results based on the ATS. 
 This test statistic tends to rather
 conservative decisions in case of small sample sizes and is even asymptotically only an approximation, thus not providing an asymptotic level $\alpha$ test.
 Finally, `model1$resampling` contains the p-values based on 
-the chosen resampling approach. For the ATS, only the wild bootstrap procedure can be applied.
+the chosen resampling approach. For the ATS, the permutation procedure cannot be applied.
 Due to the above mentioned issues for small sample sizes, the resampling procedure is recommended for such situations.
 
 ### Data Example 2 (Two sub-plot and two whole-plot factors)
@@ -86,10 +90,9 @@ feature (brain rate, complexity) structure the response vector.
 
 ```{r}
 data(EEG)
-set.seed(987)
 EEG_model <- RM(resp ~ sex * diagnosis * feature * region, 
                      data = EEG, subject = "id", no.subf = 2, resampling = "WildBS",
-                     iter = 1000,  alpha = 0.01, CPU = 1)
+                     iter = 1000,  alpha = 0.01, CPU = 1, seed = 987)
 summary(EEG_model)
 ```
 
@@ -97,27 +100,26 @@ We find significant effects at level $\alpha = 0.01$ of the whole-plot factors s
 
 ### Plotting
 
-The `RM()` function is equipped with a plotting option, displaying the calculated means along with $(1-\alpha)$ confidence intervals.
+The `RM()` function is equipped with a plotting option, displaying the calculated means along with $(1-\alpha)$ confidence intervals based on t-quantiles.
 The `plot` function takes an `RM` object as an argument. In addition, the factor of interest may be specified. If this argument is 
 omitted in a two- or higher-way layout, the user is asked to specify the factor for plotting. Furthermore, additional graphical parameters
-can be used to customize the plots. The optional argument `legendpos` specifies the position of the legend in higher-way layouts.
+can be used to customize the plots. The optional argument `legendpos` specifies the position of the legend in higher-way layouts, while the argument `gap` (default 0.1) specifies the distance between the error bars.
 
 ```{r}
 plot(EEG_model, factor = "sex", main = "Effect of sex on EEG values")
 plot(EEG_model, factor = "sex:diagnosis", legendpos = "topleft", col = c(4, 2))
-plot(EEG_model, factor = "sex:diagnosis:feature", legendpos = "center")
+plot(EEG_model, factor = "sex:diagnosis:feature", legendpos = "center", gap = 0.05)
 ```
 
 
 
 ## The `MANOVA` function
 
-The `MANOVA` function calculates the above mentioned test statistics for multivariate data in a design with crossed or nested factors.
+The `MANOVA` function calculates the WTS for multivariate data in a design with crossed or nested factors.
 Additionally, a modified ANOVA-type statistic (MATS) is calculated which has the additional advantage of being applicable to designs
 involving singular covariance matrices and is invariant under scale transformations of the data, see Friedrich and Pauly (2017) for details.
 The resampling methods provided are a parametric bootstrap approach and a
-wild bootstrap using Rademacher weights. The wild bootstrap is also implemented for the ATS, while the parametric approach works only for the WTS and MATS,
-see Konietschke et al. (2015) for details. 
+wild bootstrap using Rademacher weights. 
 Note that only balanced nested designs (i.e., the same number of factor levels $b$ for each level of the factor $A$) with up to three factors are 
 implemented. Designs involving both crossed and nested factors are not implemented. Data must be provided in long format (for wide format, see `MANOVA.wide` below).
 
@@ -130,6 +132,7 @@ some groups (e.g., only 2 male patients aged $<$ 70 were diagnosed with AD) we r
 The analysis of this example is shown below.
 
 The `MANOVA` function takes as arguments:
+
 * `formula`: A formula consisting of the outcome variable on the left hand side of a \~ operator and the factor
 variables of interest on the right hand side. An interaction term must be specified.
 * `data`: A data.frame, list or environment containing the variables in `formula`.
@@ -140,7 +143,11 @@ variables of interest on the right hand side. An interaction term must be specif
 set to 'paramBS'.
 * `CPU`: The number of cores used for parallel computing. If omitted, cores are detected automatically.
 * `seed`: A random seed for the resampling procedure. If omitted, no reproducible seed is set.
-
+* `nested.levels.unique`: For nested designs only: A logical specifying whether the levels of the nested factor(s)
+   are labeled uniquely or not. Default is FALSE, i.e., the levels of the nested 
+   factor are the same for each level of the main factor. For an example and more explanations
+   see the GFD package and the corresponding vignette.
+* `dec`: The number of decimals the results should be rounded to. Default is 3.
 
 ```{r}
 data(EEG)
@@ -150,7 +157,7 @@ EEG_MANOVA <- MANOVA(resp ~ sex * diagnosis,
 summary(EEG_MANOVA)
 ```
 
-The output consists of several parts: First, some descriptive statistics of the data set are displayed, namely the sample size and mean for each factor level combination and each dimension (dimensions occur in the same order as in the original data set). In this example, Mean 1 to Mean 3 correspond to the brainrate (temporal, frontal, central) while Mean 4--6 correspond to complexity. Second, the results based on the WTS are displayed. For each factor, the test statistic, degree of freedom and p-value is given. The output for the ATS is similar. For the MATS, only the value of the test statistic is given, since inference is here based on the resampling procedure only. The resampling-based p-values are finally displayed for all test statistics (where applicable).
+The output consists of several parts: First, some descriptive statistics of the data set are displayed, namely the sample size and mean for each factor level combination and each dimension. (Dimensions occur in the same order as in the original data set. For a labeled output, use `MANOVA.wide()`.) In this example, Mean 1 to Mean 3 correspond to the brainrate (temporal, frontal, central) while Mean 4--6 correspond to complexity. Second, the results based on the WTS are displayed. For each factor, the test statistic, degree of freedom and p-value is given. For the MATS, only the value of the test statistic is given, since inference is here based on the resampling procedure only. The resampling-based p-values are finally displayed for both test statistics.
 
 
 ### The `MANOVA.wide` function
@@ -183,6 +190,7 @@ Details on the methods can be found in Friedrich and Pauly (2017).
 
 Confidence regions can be calculated using the `conf.reg` function. Note that confidence regions can only be plotted in designs with 2 dimensions.
 The `conf.reg` function takes as arguments:
+
 * `object`: A `MANOVA` object calculated via `MANOVA()`.
 * `nullhypo`: In designs involving more than one factor, it is necessary to specify the null hypothesis, i.e., the contrast of interest.
 
@@ -238,7 +246,7 @@ summary(fit2)
 ## optional GUI
 
 The `MANOVA.RM` package is equipped with an optional graphical user interface, which is based on `RGtk2`. The GUI may be started in `R` (if `RGtk2` is installed) using the
-command `GUI.RM()` and `GUI.MANOVA()` for repeated measures designs and multivariate data, respectively. 
+command `GUI.RM()` and `GUI.MANOVA()` or `GUI.MANOVAwide()` for repeated measures designs and multivariate data, respectively. 
 
 ```{r}
 if (requireNamespace("RGtk2", quietly = TRUE)) {

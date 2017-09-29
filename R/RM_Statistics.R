@@ -1,5 +1,6 @@
 ## function for calculating test statistics, permutation etc for repeated measures
-RM.Stat<- function(data, nind, n, hypo_matrix, iter, alpha, iii, hypo_counter, n.sub, n.groups, resampling, CPU, seed){
+RM.Stat<- function(data, nind, n, hypo_matrix, iter, alpha, iii, hypo_counter, n.sub, 
+                   n.groups, resampling, CPU, seed, CI.method){
   
   N <- sum(nind)
   H <- hypo_matrix
@@ -46,13 +47,13 @@ RM.Stat<- function(data, nind, n, hypo_matrix, iter, alpha, iii, hypo_counter, n
   }
   
   #----------------------------Permutation --------------------------------#
-  
-  PermMatrix <- matrix(0, nrow = N * n.sub, ncol = iter)
-  for (pp in 1:iter){
-    PermMatrix[, pp] <- sample(1:(N * n.sub), replace = FALSE)
-  }
-  
   Perm <- function(arg, ...){
+    
+    PermMatrix <- matrix(0, nrow = N * n.sub, ncol = iter)
+    for (pp in 1:iter){
+      PermMatrix[, pp] <- sample(1:(N * n.sub), replace = FALSE)
+    }
+    
     xperm <- x[PermMatrix[, arg]]
     meansP <- A %*% xperm
     VP <- list(NA)
@@ -96,7 +97,13 @@ RM.Stat<- function(data, nind, n, hypo_matrix, iter, alpha, iii, hypo_counter, n
     
     TP <- t(H) %*% MASS::ginv(H %*% SnP %*% t(H)) %*% H
     WTPS <- diag(N * t(meansP) %*% TP %*% meansP)
-    return(WTPS)
+    # ATS
+    C <- t(H) %*% MASS::ginv(H %*% t(H)) %*% H
+    D <- diag(C) * diag(ncol(C))
+    spur <- sum(diag(C %*% SnP))
+    Lambda <- diag(1 / (n - 1))
+    ATS_res <- N / spur * t(meansP) %*% C %*% meansP
+    return(list(WTPS, ATS_res))
   }
   
   #---------------------------------- Wild bootstrap ---------------------------------#
@@ -148,9 +155,10 @@ RM.Stat<- function(data, nind, n, hypo_matrix, iter, alpha, iii, hypo_counter, n
       parallel::clusterSetRNGStream(cl, iseed = seed)
     }
     WTPS <- parSapply(cl, 1:iter, FUN = PBS)
-    ecdf_WTPS <- ecdf(WTPS)
+    ecdf_WTPS <- ecdf(unlist(WTPS[1, ]))
     p_valueWTPS <- 1-ecdf_WTPS(WTS)    
-    p_valueATS_res <- NA
+    ecdf_ATS_res <- ecdf(unlist(WTPS[2, ]))
+    p_valueATS_res <- 1-ecdf_ATS_res(ATS)
   } else if(resampling == "WildBS"){
     if(seed != 0){
       parallel::clusterSetRNGStream(cl, iseed = seed)
@@ -164,13 +172,21 @@ RM.Stat<- function(data, nind, n, hypo_matrix, iter, alpha, iii, hypo_counter, n
   
   parallel::stopCluster(cl)
   
+  #------------------------ resampling quantile -------------------#
+  quant_WTS <- quantile(ecdf_WTPS, alpha)
+  
   #------------------------ p-values -------------------------------#
   p_valueWTS <- 1 - pchisq(abs(WTS), df = df_WTS)
   p_valueATS <- 1 - pf(abs(ATS), df1 = df_ATS, df2 = df_ATS2)
   
   #---------------------- CIs -------------------------------------#
+  if (CI.method == "t-quantile"){
   CI_lower <- means - sqrt(diag(Sn) / n) * qt(1 - alpha / 2, df = n)
   CI_upper <- means + sqrt(diag(Sn) / n) * qt(1 - alpha / 2, df = n)
+  } else if (CI.method == "resampling"){
+    CI_lower <- means - sqrt(diag(Sn) / n) * quant_WTS
+    CI_upper <- means + sqrt(diag(Sn) / n) * quant_WTS
+  }
   
   #-------------------- Output ----------------------------------#
   WTS_out <- c(WTS, df_WTS, p_valueWTS)
@@ -178,6 +194,6 @@ RM.Stat<- function(data, nind, n, hypo_matrix, iter, alpha, iii, hypo_counter, n
   WTPS_out <- c(p_valueWTPS, p_valueATS_res)
   CI <- cbind(CI_lower, CI_upper)
   result <- list(WTS = WTS_out, WTPS = WTPS_out, ATS = ATS_out,
-                 Cov = Sn, Mean = means, CI = CI)
+                 Cov = Sn, Mean = means, CI = CI, quantile = quant_WTS)
   return(result)
 }
