@@ -14,7 +14,7 @@ contains the response variable and the right hand side contains the factor
 variables of interest. An interaction term must be specified.}
 
 \item{data}{A data.frame, list or environment containing the variables in 
-\code{formula}. Data must be in long format.}
+\code{formula}. Data must be in long format and must not contain missing values.}
 
 \item{subject}{The column name of the subjects in the data.}
 
@@ -61,7 +61,7 @@ semi-parametric multivariate data.
 \details{
 The MANOVA() function provides the Wald-type statistic (WTS) as well as
   the modified ANOVA-type statistic (MATS) for multivariate designs with metric data as described in 
-  Konietschke et al. (2015) and Friedrich and Pauly (2017), respectively. The MATS is invariant
+  Konietschke et al. (2015) and Friedrich and Pauly (2018), respectively. The MATS is invariant
   under scale transformations of the components and applicable to designs with singular covariance
   matrices.
   Both tests are applicable for non-normal error terms, 
@@ -75,6 +75,7 @@ The MANOVA() function provides the Wald-type statistic (WTS) as well as
 restrictions on CRAN. Usually it is recommended to use at least 1000 iterations. 
 For more information and detailed examples also refer to the package vignette.
 }
+
 \examples{
 data(EEG)
 EEG_mod <- MANOVA(resp ~ sex * diagnosis, 
@@ -91,18 +92,18 @@ Konietschke, F., Bathke, A. C., Harrar, S. W. and Pauly, M. (2015).
   Friedrich, S., Brunner, E. and Pauly, M. (2017). Permuting longitudinal data
   in spite of the dependencies. Journal of Multivariate Analysis, 153, 255-265.
   
-   Bathke, A., Friedrich, S., Konietschke, F., Pauly, M., Staffen, W., Strobl, N. and Hoeller, Y. (2016).
-   Using EEG, SPECT, and Multivariate Resampling Methods
-   to Differentiate Between Alzheimer's and other Cognitive Impairments. arXiv preprint arXiv:1606.09004.
+  Bathke, A., Friedrich, S., Konietschke, F., Pauly, M., Staffen, W., Strobl, N. and 
+  Hoeller, Y. (2018). Testing Mean Differences among Groups: Multivariate and Repeated 
+  Measures Analysis with Minimal Assumptions. Multivariate Behavioral Research, 53(3), 348-359, 
+  Doi: 10.1080/00273171.2018.1446320.
   
   Friedrich, S., Konietschke, F., Pauly, M. (2017). GFD - An 
   R-package for the Analysis of General Factorial Designs. 
   Journal of Statistical Software, 79(1), 1-18.
   
-  Friedrich, S., and Pauly, M. (2017). MATS: Inference for potentially singular and
-  heteroscedastic MANOVA. arXiv preprint arXiv:1704.03731.
+  Friedrich, S., and Pauly, M. (2018). MATS: Inference for potentially singular and
+  heteroscedastic MANOVA. Journal of Multivariate Analysis, 165, 166-179.
 }
 \seealso{
 \code{\link{RM}}
 }
-

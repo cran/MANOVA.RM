@@ -1,10 +1,29 @@
-# MANOVA.RM 0.1.3
+# MANOVA.RM 0.3.1
+* implementation of post-hoc comparisons
+* formula without interaction term possible (in MANOVA)
+* warning message for singular covariance matrices (RM)
+* improve runtime for permutation
+* improve output
+* allow for univariate calculations in MANOVA.wide
+
+# MANOVA.RM 0.2.3
+* add documentation for S3 methods
+* improve documentation in vignette
+* fix handling of variables coded as factors in nested designs
+
+# MANOVA.RM 0.2.2
+* warning message for singular covariance matrices
+* implement output of confidence intervals for interactions (RM design, option: CI.info in plot(...))
+
+# MANOVA.RM 0.2.1
 * improved plotting routine for RM models, now allowing for more user-specified parameters
+* parametric bootstrap now also implemented for the ATS in RM-Designs
 * excluded calculation for ATS in multivariate settings (no sensible test statistic in this context)
-* include factor AgeGroup in EEGwide data
 * fixed some bugs in ordering of data for multivariate higher-way layouts
 and setting of random seed in permutation procedure
-* CIs can now also be calculated using the resampling quantiles
+* CIs can now also be calculated using the resampling quantiles of the WTS
+* include factor AgeGroup in EEGwide data
+
 
 # MANOVA 0.1.2
 * included EEG data example in wide format

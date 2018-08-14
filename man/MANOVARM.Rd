@@ -13,7 +13,7 @@ will be explained in detail below.
 \section{MANOVA and MANOVA.wide function}{
  The MANOVA() and MANOVA.wide() functions provide
  the Wald-type statistic (WTS) as well as a modified ANOVA-type statistic (MATS)
- as in Friedrich and Pauly (2017)
+ as in Friedrich and Pauly (2018)
  for multivariate designs with metric data as described in 
  Konietschke et al. (2015). These are applicable
  for non-normal error terms, different sample sizes and/or
@@ -38,6 +38,7 @@ will be explained in detail below.
  resampling approaches (Permutation, parametric bootstrap, Wild bootstrap).
  For further details, see \code{RM}.
 }
+
 \references{
 Konietschke, F., Bathke, A. C., Harrar, S. W. and Pauly, M. (2015).
  Parametric and nonparametric bootstrap methods for general MANOVA. Journal
@@ -50,12 +51,11 @@ Konietschke, F., Bathke, A. C., Harrar, S. W. and Pauly, M. (2015).
  R-package for the Analysis of General Factorial Designs. 
  Journal of Statistical Software, 79(1), 1-18.
  
- Bathke, A., Friedrich, S., Konietschke, F., Pauly, M., Staffen, W., Strobl, N. 
- and Hoeller, Y. (2016). Using EEG, SPECT, and Multivariate Resampling Methods
- to Differentiate Between Alzheimer's and other Cognitive Impairments. 
- arXiv preprint arXiv: 1606.09004.
+  Bathke, A., Friedrich, S., Konietschke, F., Pauly, M., Staffen, W., Strobl, N. and 
+  Hoeller, Y. (2018). Testing Mean Differences among Groups: Multivariate and Repeated 
+  Measures Analysis with Minimal Assumptions. Multivariate Behavioral Research. 
+  Doi: 10.1080/00273171.2018.1446320.
  
- Friedrich, S., and Pauly, M. (2017). MATS: Inference for potentially singular and
- heteroscedastic MANOVA. arXiv preprint arXiv:1704.03731.
+ Friedrich, S., and Pauly, M. (2018). MATS: Inference for potentially singular and
+ heteroscedastic MANOVA. Journal of Multivariate Analysis, 165, 166-179.
 }
-

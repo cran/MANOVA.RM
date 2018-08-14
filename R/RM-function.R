@@ -9,7 +9,7 @@
 #'   variables of interest. An interaction term must be specified. The time variable
 #'   must be the last factor in the formula.
 #' @param data A data.frame, list or environment containing the variables in 
-#'   \code{formula}. Data must be in long format.
+#'   \code{formula}. Data must be in long format and must not contain missing values.
 #' @param subject The column name of the subjects in the data.
 #' @param no.subf The number of sub-plot factors in the data, default is 1.
 #' @param iter The number of iterations used for calculating the resampled 
@@ -51,8 +51,9 @@
 #'   approach.}
 #' 
 #' @examples data(o2cons)
+#' \dontrun{
 #' oxy <- RM(O2 ~ Group * Staphylococci * Time, data = o2cons, 
-#'             subject = "Subject", no.subf = 2, iter = 100, resampling = "Perm", CPU = 1)
+#'             subject = "Subject", no.subf = 2, iter = 1000, resampling = "Perm", CPU = 1)
 #' summary(oxy)
 #' plot(oxy, factor = "Group") 
 #'  
@@ -62,7 +63,7 @@
 #' # using the EEG data, consider additional within-subjects factors 'brain region' 
 #' # and 'feature'
 #' data(EEG)
-#' \dontrun{
+
 #' EEG_model <- RM(resp ~ sex * diagnosis * feature * region, 
 #'                data = EEG, subject = "id", no.subf = 2, resampling = "WildBS",
 #'                iter = 1000,  alpha = 0.01, CPU = 4, seed = 987, dec = 2)
@@ -74,11 +75,11 @@
 #' @references Friedrich, S., Brunner, E. and Pauly, M. (2017). Permuting longitudinal
 #'  data in spite of the dependencies. Journal of Multivariate Analysis, 153, 255-265.
 #' 
-#'  Bathke, A., Friedrich, S., Konietschke, F., Pauly, M., Staffen, W., Strobl, N.
-#'   and Hoeller, Y. (2016). Using EEG, SPECT, and Multivariate Resampling Methods
-#'   to Differentiate Between Alzheimer's and other Cognitive Impairments. 
-#'   arXiv preprint arXiv:1606.09004
-#' 
+#'   Bathke, A., Friedrich, S., Konietschke, F., Pauly, M., Staffen, W., Strobl, N. and 
+#'   Hoeller, Y. (2018). Testing Mean Differences among Groups: Multivariate and Repeated 
+#'   Measures Analysis with Minimal Assumptions. Multivariate Behavioral Research, 53(3), 348-359,
+#'   Doi: 10.1080/00273171.2018.1446320.
+#'  
 #'   Friedrich, S., Konietschke, F., Pauly, M. (2017). GFD - An 
 #'   R-package for the Analysis of General Factorial Designs. 
 #'   Journal of Statistical Software, 79(1), 1-18.
@@ -124,6 +125,10 @@ RM <- function(formula, data, subject,
     stop("The subject variable is not found!")
   }
   subject <- data[, subject]
+  if (length(subject) != nrow(dat)){
+    stop("There are missing values in the data.")
+  }
+  
   dat2 <- data.frame(dat, subject = subject)
   nf <- ncol(dat) - 1
   nadat <- names(dat)
@@ -224,11 +229,19 @@ RM <- function(formula, data, subject,
       whole_count <- 0
     }
     
-    hypo_matrices <- HC(fl, perm_names, fac_names)[[1]]
-    fac_names <- HC(fl, perm_names, fac_names)[[2]]
-    if (length(fac_names) != length(hypo_matrices)) {
+    # number of hypotheses
+    tmp <- 0
+    for (i in 1:nf) {
+      tmp <- c(tmp, choose(nf, i))
+      nh <- sum(tmp)
+    }
+    if (length(fac_names) != nh) {
       stop("Something is wrong: Perhaps a missing interaction term in formula?")
     }
+    
+    hypo_matrices <- HC(fl, perm_names, fac_names)[[1]]
+    fac_names <- HC(fl, perm_names, fac_names)[[2]]
+    
     WTS_out <- matrix(NA, ncol = 3, nrow = length(hypo_matrices))
     ATS_out <- matrix(NA, ncol = 4, nrow = length(hypo_matrices))
     WTPS_out <- matrix(NA, nrow = length(hypo_matrices), ncol = 2)
@@ -298,6 +311,13 @@ RM <- function(formula, data, subject,
                                 "lower", "upper", "fac_names_original", "dat2", "fl",
                                 "alpha", "nadat2", "lev_names")
   }
+  
+  # check for singular covariance matrix
+  test <- try(solve(output$Covariance), silent = TRUE)
+  if(!is.matrix(test)){
+    warning("The covariance matrix is singular. The WTS provides no valid test statistic!")
+  }
+  
   class(output) <- "RM"
   return(output)
 }

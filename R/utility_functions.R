@@ -1,6 +1,20 @@
 xaxt <- NULL
+#' Plot function for an RM object
+#' 
+#' Generic plot function for \code{RM} objects: Returns a plot of the mean values along with confidence 
+#' intervals for a factor (combination) specified by the user.
+#' 
+#' @param x An object of class \code{RM}
+#' @param CI.info If CI.info = TRUE, the mean values and confidence limits of the considered
+#' contrast are printed.
+#' @param ... Additional parameters to be passed to plot()
+#' 
+#' @details An additional argument \code{factor} can be used to specify the factor(s) used for plotting in two- and higher-way
+#' layouts. See the examples for details.
+#' 
+
 #' @export 
-plot.RM <- function (x, ...) {
+plot.RM <- function (x, CI.info = FALSE, ...) {
   
   object <- x
   dots <- list(...)
@@ -43,30 +57,55 @@ plot.RM <- function (x, ...) {
   xmax <- ncol(h$y)+ nrow(h$y)*gap
   # default values
   args <- list(h,
-               lwd = 2, ylab = "Means", xlab = h$xlab, col = 1:length(fac.names),
+               lwd = 2, ylab = "Means", xlab = h$xlab, col = 1:length(h$legend),
                pch = 1:18, legendpos = "topright", xlim = c(0.8, xmax + 0.1),
                ylim =c(min(h$li), max(h$ui)), gap = 0.1, xaxt = "n", ax)
   
   args[names(dots)] <- dots
   do.call(newplotting, args = args)
+  
+  if (CI.info == TRUE){
+    CI.out <- list()
+    CI.out$mean <- h$y
+    CI.out$lower <- h$li
+    CI.out$upper <- h$ui
+    return(CI.out)
+  }
+  
 }
 
+#' Display MANOVA object
+#' 
+#' Returns a short summary of the results (test statistics with p-values)
+#' 
+#' @param x A MANOVA object
+#' @param ... Additional parameters (currently not used)
+#' 
 #' @export
 print.MANOVA <- function(x, ...) {
-  a <- x$input
+  object <- x
+  a <- object$input
   cat("Call:", "\n")
   print(a$formula)
   cat("\n", "Wald-Type Statistic (WTS):", "\n", sep = "")
-  print(x$WTS)
+  print(object$WTS)
   # cat("\n", "ANOVA-Type Statistic (ATS):", "\n", sep = "")
   #  print(x$ATS)
   cat("\n", "modified ANOVA-Type Statistic (MATS):", "\n", sep = "")
-  print(x$MATS)
+  print(object$MATS)
   cat("\n", "p-values resampling:", "\n", sep = "")
-  print(x$resampling)
+  print(object$resampling)
 }
 
 
+#' Summarizing a MANOVA object
+#' 
+#' Returns a summary of the results including mean vectors and sample sizes for all groups as well
+#' as test statistics with degrees of freedom and p-values
+#' 
+#' @param object A MANOVA object
+#' @param ... Additional parameters (currently not used)
+#' 
 #' @export
 summary.MANOVA <- function (object, ...) {
   a <- object$input
@@ -82,19 +121,39 @@ summary.MANOVA <- function (object, ...) {
   print(object$resampling)
 }
 
+#' Display an RM object
+#' 
+#' Returns a short summary of the results (test statistics with p-values)
+#' 
+#' @param x An RM object
+#' @param ... Additional parameters (currently not used)
+#' 
 #' @export
 print.RM <- function(x, ...) {
-  a <- x$input
+  object <- x
+  a <- object$input
   cat("Call:", "\n")
   print(a$formula)
   cat("\n", "Wald-Type Statistic (WTS):", "\n", sep = "")
-  print(x$WTS)
+  print(object$WTS)
   cat("\n", "ANOVA-Type Statistic (ATS):", "\n", sep = "")
-  print(x$ATS)
+  print(object$ATS)
   cat("\n", "p-values resampling:", "\n", sep = "")
-  print(x$resampling)
+  if(x$input$resampling == "Perm"){
+    print(object$resampling[, 1, drop = FALSE])
+  } else {
+    print(object$resampling)
+  }
 }
 
+#' Summarizing an RM object
+#' 
+#' Returns a summary of the results including mean values, variances and sample sizes for all groups as well
+#' as test statistics with degrees of freedom and p-values
+#' 
+#' @param object An RM object
+#' @param ... Additional parameters (currently not used)
+#' 
 #' @export
 summary.RM <- function (object, ...) {
   a <- object$input
@@ -107,7 +166,11 @@ summary.RM <- function (object, ...) {
   cat("\n", "ANOVA-Type Statistic (ATS):", "\n", sep = "")
   print(object$ATS)
   cat("\n", "p-values resampling:", "\n", sep = "")
-  print(object$resampling)
+  if(a$resampling == "Perm"){
+    print(object$resampling[, 1, drop = FALSE])
+  } else {
+    print(object$resampling)
+  }
 }
 
 #' @export 
