@@ -2,7 +2,7 @@
 % Please edit documentation in R/MANOVA_simCI.R
 \name{simCI}
 \alias{simCI}
-\title{Simultaneous confidence intervals for contrasts in multivariate factorial designs.}
+\title{Multivariate post-hoc comparisons and simultaneous confidence intervals for contrasts in multivariate factorial designs}
 \usage{
 simCI(object, contrast = c("pairwise", "user-defined"), contmat = NULL,
   type = NULL, base = 1, ...)
@@ -25,14 +25,16 @@ for Dunnett contrasts, see \code{\link[multcomp]{contrMat}}.}
 \item{...}{Not used yet.}
 }
 \value{
-Simultaneous confidence intervals for the chosen contrasts.
+Multivariate p-values and simultaneous confidence intervals for the chosen contrasts.
 }
 \description{
-Simultaneous confidence intervals for contrasts in multivariate factorial designs.
+Multivariate post-hoc comparisons and simultaneous confidence intervals for contrasts in multivariate factorial designs
 }
 \details{
-The simCI() function computes confidence intervals for the chosen contrasts of the multivariate mean vector 
-based on the sum statistic. Details on the derivation of these confidence intervals can be found in Friedrich and Pauly (2018).
+The simCI() function computes the multivariate p-values for the chosen contrast of the multivariate mean vector 
+based on the bootstrap version of the sum statistic. Details on this test can be found in Friedrich and Pauly (2018).
+Furthermore, confidence intervals for summary effects (i.e., averaged over each dimension), also based on the bootstrap
+version of the sum statistic, are returned as well.
 }
 \references{
 Friedrich, S., and Pauly, M. (2018). MATS: Inference for potentially singular and
