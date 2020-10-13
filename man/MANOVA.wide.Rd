@@ -6,12 +6,12 @@
 \usage{
 MANOVA.wide(formula, data, iter = 10000, alpha = 0.05,
   resampling = "paramBS", CPU, seed, nested.levels.unique = FALSE,
-  dec = 3)
+  dec = 3, ...)
 }
 \arguments{
 \item{formula}{A model \code{\link{formula}} object. The left hand side 
 contains the matrix of response variables and the right hand side contains the factor 
-variables of interest. An interaction term must be specified.}
+variables of interest.}
 
 \item{data}{A data.frame, list or environment containing the variables in 
 \code{formula}. Data must be in wide format. Note: Lines containing missing values will 
@@ -38,6 +38,8 @@ factor are the same for each level of the main factor. For an example and more e
 see the GFD package and the corresponding vignette.}
 
 \item{dec}{Number of decimals the results should be rounded to. Default is 3.}
+
+\item{...}{Not used yet.}
 }
 \value{
 See \code{\link{MANOVA}}

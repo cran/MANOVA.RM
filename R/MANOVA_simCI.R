@@ -7,8 +7,13 @@
 #' @param type If contrast is "pairwise", the type of the pairwise comparison must be specified here. 
 #' Calculation is based on the contrMat function in package multcomp, see the corresponding help page 
 #' for details on the types of contrasts available.
-#' @param base an interger specifying which group is considered the baseline group 
+#' @param base An integer specifying which group is considered the baseline group 
 #' for Dunnett contrasts, see \code{\link[multcomp]{contrMat}}.
+#' @param interaction Logical. If interaction = FALSE in models with more than one factor, the factor of interest for 
+#' the post-hoc analysis must be specified. Default is TRUE, which means post-hoc tests are performed for all factor
+#' level combinations.
+#' @param factor Only needed if interaction = FALSE. Specifies the factor for which post-hoc analysis are requested.
+#' @param silent Set to TRUE to suppress output.
 #' @param ... Not used yet.
 #'   
 #' @details The simCI() function computes the multivariate p-values for the chosen contrast of the multivariate mean vector 
@@ -26,11 +31,26 @@
 #' @importFrom multcomp contrMat
 #'
 #' @export
-simCI <- function(object, contrast = c("pairwise", "user-defined"), contmat = NULL, type = NULL,
-                  base = 1, ...){
+simCI <- function(object, contrast, contmat = NULL, type = NULL,
+                  base = 1, interaction = TRUE, factor = NA, silent = FALSE, ...){
   
   if(object$nested){
     stop("The pairwise comparisons cannot be used in nested designs!")
+  }
+  
+  if(!interaction){
+    if(is.na(factor)){
+      stop("Please enter the factor you wish to perform post-hoc tests on!")
+    }
+    if(!factor %in% object$factors){
+      stop("The factor was not used in the original model!")
+    }
+    form1 <- strsplit(as.character(object$input$formula), "~", fixed = TRUE)[[2]]
+    refit.formula <- as.formula(paste(form1, "~", factor))
+    object <- object$modelcall(refit.formula, data = object$input$data, iter = object$input$iter, 
+                               resampling = object$input$resampling, alpha = object$input$alpha,
+                               seed = object$input$seed, subject = object$input$subject, CPU = object$CPU)
+    
   }
   
   meanvec <- as.vector(t(object$Means))
@@ -44,15 +64,19 @@ simCI <- function(object, contrast = c("pairwise", "user-defined"), contmat = NU
   BSD <- object$BSVar
   alpha <- object$input$alpha
   fl <- object$fl
-  lev <- subset(object$Descriptive, select = 1:n)
-  lev <- lev[-ncol(lev)]
+  lev <- subset(object$Descriptive, select = 1:nf)
   
   if(contrast == "user-defined"){
     if(is.null(contmat)){
       stop("Please specify a contrast matrix.")
     }
+    # simple contrast vector
+    if(is.null(dim(contmat))){
+      contmat <- t(as.matrix(contmat))
+    } else {
     if(sum(rowSums(contmat) > 1e-15) != 0){
       stop("The rows of the contrast matrix must sum to zero!")
+    }
     }
     if (ncol(contmat) != p*prod(fl)){
       stop(paste("The contrast matrix must have", prod(fl)*p, "columns."))
@@ -68,7 +92,7 @@ simCI <- function(object, contrast = c("pairwise", "user-defined"), contmat = NU
     if(nf == 1){
       names(n) <- lev[, 1]
     } else {
-      names(n) <- sort(do.call(paste, c(lev, sep = " ")))
+        names(n) <- do.call(paste, c(lev, sep = " "))
     }
       M <- contrMat(n, type = type, base)
       contmat <- M %x% t(rep(1, p))
@@ -116,7 +140,10 @@ simCI <- function(object, contrast = c("pairwise", "user-defined"), contmat = NU
     p_val<- data.frame("contrast" = rownames(M), "p-value" = p_val)
   }
   
+  # avoid printing zeros
+  # p_val[p_val[, "p.value"] == 0, "p.value"] <- "<0.001"
   
+  if(!silent){
   cat("\n", "#------ Call -----#", 
       "\n", "\n", "-", "Contrast: ", contrast.output, 
       "\n", "-", "Confidence level:", (1 - alpha) * 100, "%", 
@@ -129,7 +156,7 @@ simCI <- function(object, contrast = c("pairwise", "user-defined"), contmat = NU
   cat("\n", "#-----------Confidence intervals for summary effects-------------#", 
   "\n", "\n")
   print(scis_out)
-  
+  }
   
  invisible(scis)
 }

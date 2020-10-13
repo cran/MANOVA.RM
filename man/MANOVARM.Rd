@@ -7,7 +7,7 @@
 \title{MANOVA.RM: A package for calculating test statistics and their resampling versions for
 heteroscedastic semi-parametric multivariate data or repeated measures designs.}
 \description{
-The MANOVA.RM package provides two important functions: MANOVA() and RM() which 
+The MANOVA.RM package provides three important functions: MANOVA(), RM() and multRM() which 
 will be explained in detail below.
 }
 \section{MANOVA and MANOVA.wide function}{
@@ -39,7 +39,17 @@ will be explained in detail below.
  For further details, see \code{RM}.
 }
 
+\section{multRM function}{
+ The multRM() function is a combination of the procedures
+ above suited for multivariate repeated measures designs. It provides the WTS and the MATS
+ along with p-values based on a parametric or a wild bootstrap approach.
+}
+
 \references{
+Friedrich, S., Konietschke, F., and Pauly, M. (2019). Resampling-Based Analysis
+of Multivariate Data and Repeated Measures Designs with the R Package MANOVA.RM. 
+The R Journal, 11(2), 380-400.
+
 Konietschke, F., Bathke, A. C., Harrar, S. W. and Pauly, M. (2015).
  Parametric and nonparametric bootstrap methods for general MANOVA. Journal
  of Multivariate Analysis, 140, 291-301.

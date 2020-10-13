@@ -10,17 +10,17 @@ RM(formula, data, subject, no.subf = 1, iter = 10000, alpha = 0.05,
 \arguments{
 \item{formula}{A model \code{\link{formula}} object. The left hand side
 contains the response variable and the right hand side contains the factor
-variables of interest. An interaction term must be specified. The time variable
-must be the last factor in the formula.}
+variables of interest. An interaction term must be specified. The within-subject factor(s)
+must be the last factor(s) in the formula.}
 
 \item{data}{A data.frame, list or environment containing the variables in 
 \code{formula}. Data must be in long format and must not contain missing values.}
 
 \item{subject}{The column name of the subjects in the data. NOTE: Subjects within 
-different groups of whole-plot factors must have individual labels, see Details for 
+different groups of between-subject factors must have individual labels, see Details for 
 more explanation.}
 
-\item{no.subf}{The number of sub-plot factors in the data, default is 1.}
+\item{no.subf}{The number of within-subject factors in the data, default is 1.}
 
 \item{iter}{The number of iterations used for calculating the resampled 
 statistic. The default option is 10,000.}
@@ -75,13 +75,13 @@ The RM() function provides the Wald-type
  approaches.
  NOTE: The number of within-subject factors needs to be specified in the
  function call. If only one factor is present, it is assumed that this is a
- within-subjects factor (e.g. time).
+ within-subject factor (e.g. time).
  
- If subjects in different groups of the whole-plot factor have the same id, they will 
+ If subjects in different groups of the between-subject factor have the same id, they will 
  not be identified as different subjects and thus it is erroneously assumed that their 
- measurements belong to one subject. Example: Consider a study with one whole-plot factor 
- "treatment" with leels verum and placebo aand one sub-plot factor "time" (4 measurements).
- If subjects in the placebo group are labelled 1-20 and subjects in the verum group have 
+ measurements belong to one subject. Example: Consider a study with one between-subject factor 
+ "treatment" with levels verum and placebo and one within-subject factor "time" (4 measurements).
+ If subjects in the placebo group are labeled 1-20 and subjects in the verum group have 
  the same labels, the program erroneously assumes 20 individuals with 8 measurements each instead of 
  40 individuals with 4 measurements each.
 }
@@ -107,7 +107,11 @@ summary(EEG_model)
 
 }
 \references{
-Friedrich, S., Brunner, E. and Pauly, M. (2017). Permuting longitudinal
+Friedrich, S., Konietschke, F., and Pauly, M. (2019). Resampling-Based Analysis
+ of Multivariate Data and Repeated Measures Designs with the R Package MANOVA.RM.
+ The R Journal, 11(2), 380-400.
+
+ Friedrich, S., Brunner, E. and Pauly, M. (2017). Permuting longitudinal
  data in spite of the dependencies. Journal of Multivariate Analysis, 153, 255-265.
 
   Bathke, A., Friedrich, S., Konietschke, F., Pauly, M., Staffen, W., Strobl, N. and 

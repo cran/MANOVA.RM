@@ -45,8 +45,8 @@ fit <- MANOVA.wide(cbind(tear, gloss, opacity) ~ rate * additive, data = example
 summary(fit)
 
 ## ------------------------------------------------------------------------
-if (requireNamespace("HSAUR", quietly = TRUE)) {
-library(HSAUR)
+if (requireNamespace("HSAUR3", quietly = TRUE)) {
+library(HSAUR3)
 data(water)
 test <- MANOVA.wide(cbind(mortality, hardness) ~ location, data = water, iter = 1000, resampling = "paramBS", CPU = 1, seed = 123)
 summary(test)
@@ -61,7 +61,7 @@ plot(cr, col = 2, lty = 2, xlab = "Difference in mortality", ylab ="Difference i
 # pairwise comparison using Tukey contrasts
 simCI(EEG_MANOVA, contrast = "pairwise", type = "Tukey")
 # the same but with Dunnett contrasts using group 2 as baseline
-simCI(EEG_MANOVA, contrast = "pairwise", type = "Dunnett", base = 2)
+#simCI(EEG_MANOVA, contrast = "pairwise", type = "Dunnett", base = 2, interaction = FALSE, factor = "diagnosis")
 # a one-way layout using MANOVA.wide():
 oneway <- MANOVA.wide(cbind(brainrate_temporal, brainrate_central) ~ diagnosis, data = EEGwide,
                       iter = 1000, CPU = 1)
@@ -113,6 +113,13 @@ fit2 <- MANOVA(dug ~ season + season:site, data = curd, subject = "subject", nes
 summary(fit1)
 summary(fit2)
 }
+
+## ------------------------------------------------------------------------
+library(tidyr)
+eeg <- spread(EEG, feature, resp)
+head(eeg)
+fit <- multRM(cbind(brainrate, complexity) ~ sex * region, data = eeg, subject = "id", within = "region", iter = 200, CPU = 1)
+summary(fit)
 
 ## ------------------------------------------------------------------------
 if (requireNamespace("RGtk2", quietly = TRUE)) {

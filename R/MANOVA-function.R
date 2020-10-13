@@ -7,7 +7,7 @@
 #' 
 #' @param formula A model \code{\link{formula}} object. The left hand side 
 #'   contains the response variable and the right hand side contains the factor 
-#'   variables of interest. An interaction term must be specified.
+#'   variables of interest.
 #' @param data A data.frame, list or environment containing the variables in 
 #'   \code{formula}. Data must be in long format and must not contain missing values.
 #' @param subject The column name of the subjects in the data.
@@ -61,7 +61,11 @@
 #' 
 #' @seealso \code{\link{RM}}
 #'   
-#' @references Konietschke, F., Bathke, A. C., Harrar, S. W. and Pauly, M. (2015). 
+#' @references
+#' Friedrich, S., Konietschke, F., and Pauly, M. (2019). Resampling-Based Analysis of Multivariate Data 
+#' and Repeated Measures Designs with the R Package MANOVA.RM. The R Journal, 11(2), 380-400.
+#' 
+#'   Konietschke, F., Bathke, A. C., Harrar, S. W. and Pauly, M. (2015). 
 #'   Parametric and nonparametric bootstrap methods for general MANOVA. Journal 
 #'   of Multivariate Analysis, 140, 291-301.
 #'   
@@ -103,10 +107,6 @@ MANOVA <- function(formula, data, subject,
     stop("For data in wide format, please use function MANOVA.wide()")
   }
   
-  input_list <- list(formula = formula, data = data,
-                     subject = subject, 
-                     iter = iter, alpha = alpha, resampling = resampling)
-  
   test1 <- hasArg(CPU)
   if(!test1){
     CPU <- parallel::detectCores()
@@ -116,6 +116,10 @@ MANOVA <- function(formula, data, subject,
   if(!test2){
     seed <- 0
   }
+  
+  input_list <- list(formula = formula, data = data,
+                     subject = subject, 
+                     iter = iter, alpha = alpha, resampling = resampling, seed = seed)
   
   dat <- model.frame(formula, data)
   if (!(subject %in% names(data))){
@@ -167,7 +171,7 @@ MANOVA <- function(formula, data, subject,
     rownames(WTS_out) <- fac_names
     names(WTPS_out) <- fac_names
     results <- MANOVA.Stat(data = response, n = n, hypo_matrices, iter = iter, alpha, resampling, n.groups = fl, p, CPU, seed, nf)    
-    WTS_out <- round(results$WTS, dec)
+    WTS_out[1, ] <- round(results$WTS, dec)
     MATS_out <- round(results$MATS, dec)
     WTPS_out <- round(results$WTPS, dec)
     quantiles <- results$quantiles
@@ -176,8 +180,8 @@ MANOVA <- function(formula, data, subject,
     Var_out <- results$Cov
     descriptive <- cbind(lev_names, n, mean_out)
     colnames(descriptive) <- c(nadat2, "n", rep("Means", p))   
-    names(WTS_out) <- cbind ("Test statistic", "df",
-                             "p-value")
+    colnames(WTS_out) <- cbind ("Test statistic", "df",
+                                "p-value")
     names(WTPS_out) <- cbind(paste(resampling, "(WTS)"), paste(resampling, "(MATS)"))
     #WTPS_out[WTPS_out == 0] <- "<0.001"
     colnames(MATS_out) <- "Test statistic"
@@ -264,7 +268,7 @@ MANOVA <- function(formula, data, subject,
         hyps <- HC_MANOVA(fl, perm_names, fac_names, p, nh)
         hypo_matrices <- hyps[[1]]
         fac_names <- hyps[[2]]
-    }
+      }
     }
     # ---------------------- error detection ------------------------------------
     
@@ -315,31 +319,31 @@ MANOVA <- function(formula, data, subject,
     colnames(descriptive) <- c(nadat2, "n", paste(rep("Mean", p), 1:p))
     colnames(WTS_out) <- cbind ("Test statistic", "df", "p-value")
     colnames(WTPS_out) <- cbind(paste(resampling, "(WTS)"), paste(resampling, "(MATS)"))
-   # WTPS_out[WTPS_out == 0] <- "<0.001"
+    # WTPS_out[WTPS_out == 0] <- "<0.001"
     colnames(MATS_out) <- "Test statistic"
     
   }
   # Output ------------------------------------------------------
-    output <- list()
-    output$time <- time
-    output$input <- input_list
-    output$Descriptive <- descriptive
-    output$Covariance <- Var_out
-    output$Means <- mean_out
-    output$MATS <- MATS_out
-    output$WTS <- WTS_out
-    output$resampling <- WTPS_out
-    output$quantile <- quantiles
-    output$nf <- nf
-    output$H <- hypo_matrices
-    output$factors <- fac_names
-    output$p <- p
-    output$fl <- fl
-    output$BSMeans <- results$BSmeans
-    output$BSVar <- results$BSVar
-    output$levels <- lev_names
-    output$nested <- nest
-  
+  output <- list()
+  output$time <- time
+  output$input <- input_list
+  output$Descriptive <- descriptive
+  output$Covariance <- Var_out
+  output$Means <- mean_out
+  output$MATS <- MATS_out
+  output$WTS <- WTS_out
+  output$resampling <- WTPS_out
+  output$quantile <- quantiles
+  output$nf <- nf
+  output$H <- hypo_matrices
+  output$factors <- fac_names
+  output$p <- p
+  output$fl <- fl
+  output$BSMeans <- results$BSmeans
+  output$BSVar <- results$BSVar
+  output$levels <- lev_names
+  output$nested <- nest
+  output$modelcall <- MANOVA
   
   # check for singular covariance matrix
   test <- try(solve(output$Covariance), silent = TRUE)

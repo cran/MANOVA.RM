@@ -115,6 +115,7 @@ print.MANOVA <- function(x, ...) {
 #' @export
 summary.MANOVA <- function (object, ...) {
   a <- object$input
+  b <- object$other
   # avoid printing zeros
   WTS <- object$WTS
   WTS[WTS[, "p-value"] == 0, "p-value"] <- "<0.001"
@@ -123,6 +124,12 @@ summary.MANOVA <- function (object, ...) {
   
   cat("Call:", "\n")
   print(a$formula)
+  
+  if(!is.null(b$within)){
+  cat("A multivariate repeated measures analysis with ", b$no.subf, "within-subject factor(s) (", b$within, ")and ", b$no.whole,
+      "between-subject factor(s).", "\n")
+}
+  
   cat("\n", "Descriptive:", "\n", sep = "")
   print(object$Descriptive)
   cat("\n", "Wald-Type Statistic (WTS):", "\n", sep = "")
@@ -188,7 +195,8 @@ summary.RM <- function (object, ...) {
   
   cat("Call:", "\n")
   print(a$formula)
-  cat("A repeated measures analysis with ", b$no.subf, "within-subject and ", b$nf-b$no.subf, "between-subject factors.", "\n")
+  cat("A repeated measures analysis with", b$no.subf, "within-subject factor(s) (", paste(object$withinfactors, collapse = ","), 
+      ") and", b$nf-b$no.subf, "between-subject factor(s).", "\n")
   cat("\n", "Descriptive:", "\n", sep = "")
   print(object$Descriptive)
   cat("\n", "Wald-Type Statistic (WTS):", "\n", sep = "")
@@ -202,6 +210,7 @@ summary.RM <- function (object, ...) {
     print(res)
   }
 }
+
 
 #' @export 
 plot.MANOVA <- function(x, ...){

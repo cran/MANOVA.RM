@@ -7,7 +7,7 @@
 #' 
 #' @param formula A model \code{\link{formula}} object. The left hand side 
 #'   contains the matrix of response variables and the right hand side contains the factor 
-#'   variables of interest. An interaction term must be specified.
+#'   variables of interest.
 #' @param data A data.frame, list or environment containing the variables in 
 #'   \code{formula}. Data must be in wide format. Note: Lines containing missing values will 
 #'   be removed.
@@ -26,6 +26,7 @@
 #'   factor are the same for each level of the main factor. For an example and more explanations
 #'   see the GFD package and the corresponding vignette.
 #' @param dec Number of decimals the results should be rounded to. Default is 3.
+#' @param ... Not used yet.
 #'  
 #' @section NOTE: The number of resampling iterations has been set to 100 in the examples due to run time 
 #' restrictions on CRAN. Usually it is recommended to use at least 1000 iterations.
@@ -53,14 +54,12 @@
 
 MANOVA.wide <- function(formula, data,
                    iter = 10000, alpha = 0.05, resampling = "paramBS", CPU,
-                   seed, nested.levels.unique = FALSE, dec = 3){
+                   seed, nested.levels.unique = FALSE, dec = 3, ...){
   
   if (!(resampling %in% c("paramBS", "WildBS"))){
     stop("Resampling must be one of 'paramBS' and 'WildBS'!")
   }
-  
-  input_list <- list(formula = formula, data = data,
-                     iter = iter, alpha = alpha, resampling = resampling)
+
   output <- list()
   
   test1 <- hasArg(CPU)
@@ -72,6 +71,9 @@ MANOVA.wide <- function(formula, data,
   if(!test2){
     seed <- 0
   }
+  
+  input_list <- list(formula = formula, data = data,
+                     iter = iter, alpha = alpha, resampling = resampling, seed = seed)
   
   dat <- model.frame(formula, data)
   nr_hypo <- attr(terms(formula), "factors")
@@ -134,6 +136,7 @@ MANOVA.wide <- function(formula, data,
   } else {
     dat2 <- dat[do.call(order, dat[, 2:(nf + 1)]), ]
     fac.groups <- do.call(list, dat2[, 2:(nf+1)])
+    lev_names <- lev_names[do.call(order, lev_names[, 1:nf]), ]
   }
     Y <- split(dat2, fac.groups, lex.order = TRUE)
     n <- sapply(Y, nrow)
@@ -284,7 +287,7 @@ MANOVA.wide <- function(formula, data,
     output$BSVar <- results$BSVar
     output$levels <- lev_names
     output$nested <- nest
-
+    output$modelcall <- MANOVA.wide
 
   # check for singular covariance matrix
   test <- try(solve(output$Covariance), silent = TRUE)

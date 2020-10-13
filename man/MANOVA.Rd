@@ -11,7 +11,7 @@ MANOVA(formula, data, subject, iter = 10000, alpha = 0.05,
 \arguments{
 \item{formula}{A model \code{\link{formula}} object. The left hand side 
 contains the response variable and the right hand side contains the factor 
-variables of interest. An interaction term must be specified.}
+variables of interest.}
 
 \item{data}{A data.frame, list or environment containing the variables in 
 \code{formula}. Data must be in long format and must not contain missing values.}
@@ -85,7 +85,10 @@ summary(EEG_mod)
 
 }
 \references{
-Konietschke, F., Bathke, A. C., Harrar, S. W. and Pauly, M. (2015). 
+Friedrich, S., Konietschke, F., and Pauly, M. (2019). Resampling-Based Analysis of Multivariate Data 
+and Repeated Measures Designs with the R Package MANOVA.RM. The R Journal, 11(2), 380-400.
+
+  Konietschke, F., Bathke, A. C., Harrar, S. W. and Pauly, M. (2015). 
   Parametric and nonparametric bootstrap methods for general MANOVA. Journal 
   of Multivariate Analysis, 140, 291-301.
   

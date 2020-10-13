@@ -6,14 +6,14 @@
 #' 
 #' @param formula A model \code{\link{formula}} object. The left hand side
 #'   contains the response variable and the right hand side contains the factor
-#'   variables of interest. An interaction term must be specified. The time variable
-#'   must be the last factor in the formula.
+#'   variables of interest. An interaction term must be specified. The within-subject factor(s)
+#'   must be the last factor(s) in the formula.
 #' @param data A data.frame, list or environment containing the variables in 
 #'   \code{formula}. Data must be in long format and must not contain missing values.
 #' @param subject The column name of the subjects in the data. NOTE: Subjects within 
-#' different groups of whole-plot factors must have individual labels, see Details for 
+#' different groups of between-subject factors must have individual labels, see Details for 
 #' more explanation.
-#' @param no.subf The number of sub-plot factors in the data, default is 1.
+#' @param no.subf The number of within-subject factors in the data, default is 1.
 #' @param iter The number of iterations used for calculating the resampled 
 #'   statistic. The default option is 10,000.
 #' @param alpha A number specifying the significance level; the default is 0.05.
@@ -40,13 +40,13 @@
 #'  approaches.
 #'  NOTE: The number of within-subject factors needs to be specified in the
 #'  function call. If only one factor is present, it is assumed that this is a
-#'  within-subjects factor (e.g. time).
+#'  within-subject factor (e.g. time).
 #'  
-#'  If subjects in different groups of the whole-plot factor have the same id, they will 
+#'  If subjects in different groups of the between-subject factor have the same id, they will 
 #'  not be identified as different subjects and thus it is erroneously assumed that their 
-#'  measurements belong to one subject. Example: Consider a study with one whole-plot factor 
-#'  "treatment" with leels verum and placebo aand one sub-plot factor "time" (4 measurements).
-#'  If subjects in the placebo group are labelled 1-20 and subjects in the verum group have 
+#'  measurements belong to one subject. Example: Consider a study with one between-subject factor 
+#'  "treatment" with levels verum and placebo and one within-subject factor "time" (4 measurements).
+#'  If subjects in the placebo group are labeled 1-20 and subjects in the verum group have 
 #'  the same labels, the program erroneously assumes 20 individuals with 8 measurements each instead of 
 #'  40 individuals with 4 measurements each.
 #'   
@@ -86,7 +86,12 @@
 #' 
 #' @seealso \code{\link[GFD]{GFD}}, \code{\link[nparLD]{nparLD}}, \code{\link{MANOVA}}
 #' 
-#' @references Friedrich, S., Brunner, E. and Pauly, M. (2017). Permuting longitudinal
+#' @references 
+#' Friedrich, S., Konietschke, F., and Pauly, M. (2019). Resampling-Based Analysis
+#'  of Multivariate Data and Repeated Measures Designs with the R Package MANOVA.RM.
+#'  The R Journal, 11(2), 380-400.
+#' 
+#'  Friedrich, S., Brunner, E. and Pauly, M. (2017). Permuting longitudinal
 #'  data in spite of the dependencies. Journal of Multivariate Analysis, 153, 255-265.
 #' 
 #'   Bathke, A., Friedrich, S., Konietschke, F., Pauly, M., Staffen, W., Strobl, N. and 
@@ -121,10 +126,6 @@ RM <- function(formula, data, subject,
     stop("CI.method must be one of 't-quantile' or 'resampling'!")
   }
   
-  input_list <- list(formula = formula, data = data,
-                     subject = subject, 
-                     iter = iter, alpha = alpha, resampling = resampling)
-  
   test1 <- hasArg(CPU)
   if(!test1){
     CPU <- parallel::detectCores()
@@ -134,6 +135,10 @@ RM <- function(formula, data, subject,
   if(!test2){
     seed <- 0
   }
+  
+  input_list <- list(formula = formula, data = data,
+                     subject = subject, 
+                     iter = iter, alpha = alpha, resampling = resampling, seed = seed)
   
   dat <- model.frame(formula, data)
   if (!(subject %in% names(data))){
@@ -147,12 +152,12 @@ RM <- function(formula, data, subject,
   
   dat2 <- data.frame(dat, subject = subject)
   # check for missing values
-  dt <- as.data.table(dat2)
-  N <- NULL
-  .N <- NULL
-  if(NROW(dt[, .N, by = subject][unique(N)])!=1){
-   stop("There are missing values in the data.")
-  }
+  # dt <- as.data.table(dat2)
+  # N <- NULL
+  # .N <- NULL
+  # if(NROW(dt[, .N, by = subject][unique(N)])!=1){
+  #  stop("There are missing values in the data.")
+  # }
   
   nf <- ncol(dat) - 1
   nadat <- names(dat)
@@ -167,10 +172,11 @@ RM <- function(formula, data, subject,
   }
   lev_names <- expand.grid(levels)
   
-  # check that subjects are correctly labelled (at least for 1 sub-plot) factor
+  # check that subjects are correctly labeled (at least for 1 sub-plot) factor
   if(no.subf == 1){
     if(nrow(data)/length(unique(subject)) != fl[length(fl)]){
-      stop(paste0("The number of subjects (", length(unique(subject)), ") times the number of time points (", fl[length(fl)], ") does not equal the total number of observations (", nrow(data), ")."))
+      stop(paste0("The number of subjects (", length(unique(subject)), ") times the number of time points
+                  (", fl[length(fl)], ") does not equal the total number of observations (", nrow(data), ")."))
     }
   }
 
@@ -186,28 +192,28 @@ RM <- function(formula, data, subject,
     hypo <- diag(fl) - matrix(1 / fl, ncol = fl, nrow = fl)
     WTS_out <- matrix(NA, ncol = 3, nrow = 1)
     ATS_out <- matrix(NA, ncol = 4, nrow = 1)
-    WTPS_out <- rep(NA, 2)
+    WTPS_out <- matrix(NA, ncol= 2, nrow = 1)
     rownames(WTS_out) <- fac_names
     rownames(ATS_out) <- fac_names
-    names(WTPS_out) <- fac_names
+    rownames(WTPS_out) <- fac_names
     results <- RM.Stat.oneway(data = response, n = n, t = fl, hypo, iter = iter, 
                               alpha, resampling, seed, CI.method)
-    WTS_out <- round(results$WTS, dec)
-    ATS_out <- round(results$ATS, dec)
-    WTPS_out <- round(results$WTPS, dec)
+    WTS_out[1,] <- round(results$WTS, dec)
+    ATS_out[1, ] <- round(results$ATS, dec)
+    WTPS_out[1, ] <- round(results$WTPS, dec)
     mean_out <- round(results$Mean, dec)
     Var_out <- round(results$Cov, dec)
     CI <- round(results$CI, dec)
     colnames(CI) <- c("CIl", "CIu")
-    descriptive <- cbind(lev_names, n, mean_out, CI)
+    descriptive <- cbind(lev_names[do.call(order, lev_names[, 1:(nf)]), ], n, mean_out, CI)
     colnames(descriptive) <- c(nadat2, "n", "Means",
                                paste("Lower", 100 * (1 - alpha), "%", "CI"),
                                paste("Upper", 100 * (1 - alpha), "%", "CI"))
     
-    names(WTS_out) <- cbind ("Test statistic", "df",
+    colnames(WTS_out) <- cbind ("Test statistic", "df",
                                 "p-value")
-    names(ATS_out) <- cbind("Test statistic", "df1", "df2", "p-value")
-    names(WTPS_out) <- cbind(paste(resampling, "(WTS)"), paste(resampling, "(ATS)"))
+    colnames(ATS_out) <- cbind("Test statistic", "df1", "df2", "p-value")
+    colnames(WTPS_out) <- cbind(paste(resampling, "(WTS)"), paste(resampling, "(ATS)"))
     output <- list()
     output$input <- input_list
     output$Descriptive <- descriptive
@@ -327,6 +333,10 @@ RM <- function(formula, data, subject,
         qt(1 - alpha / 2, df = n_groups[[i]])
     }
     
+    # Determine names of within-subject factors for output
+    facs <- rownames(attr(terms(formula), "factors"))
+    within.facs <- facs[(length(facs)-no.subf+1):length(facs)]
+    
     # Output ------------------------------------------------------
     colnames(WTS_out) <- cbind ("Test statistic", "df", "p-value")
     colnames(WTPS_out) <- cbind(paste(resampling, "(WTS)"), paste(resampling, "(ATS)"))
@@ -342,6 +352,7 @@ RM <- function(formula, data, subject,
     names(output$plotting) <- c("levels", "fac_names", "nf", "no.subf", "mu",
                                 "lower", "upper", "fac_names_original", "dat2", "fl",
                                 "alpha", "nadat2", "lev_names")
+    output$withinfactors <- within.facs
   }
   
   # check for singular covariance matrix
