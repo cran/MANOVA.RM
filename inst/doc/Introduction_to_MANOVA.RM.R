@@ -60,9 +60,11 @@ plot(cr, col = 2, lty = 2, xlab = "Difference in mortality", ylab ="Difference i
 ## ------------------------------------------------------------------------
 # pairwise comparison using Tukey contrasts
 simCI(EEG_MANOVA, contrast = "pairwise", type = "Tukey")
-# the same but with Dunnett contrasts using group 2 as baseline
-#simCI(EEG_MANOVA, contrast = "pairwise", type = "Dunnett", base = 2, interaction = FALSE, factor = "diagnosis")
-# a one-way layout using MANOVA.wide():
+
+## ------------------------------------------------------------------------
+#simCI(EEG_MANOVA, contrast = "pairwise", type = "Tukey", interaction = FALSE, factor = "diagnosis")
+
+## ------------------------------------------------------------------------
 oneway <- MANOVA.wide(cbind(brainrate_temporal, brainrate_central) ~ diagnosis, data = EEGwide,
                       iter = 1000, CPU = 1)
 # and a user-defined contrast matrix

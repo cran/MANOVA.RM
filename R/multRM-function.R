@@ -6,7 +6,8 @@
 #' 
 #' @param formula A model \code{\link{formula}} object. The left hand side
 #'   contains the matrix of response variables (using cbind()) and the right hand side 
-#'   contains the factor variables of interest.
+#'   contains the factor variables of interest. The within-subject factors must be specified
+#'    last in the formula, e.g. \code{cbind(outcome1, outcome2) ~ between1 * between2 * within1 * within2}.
 #' @param data A data.frame, list or environment containing the variables in 
 #'   \code{formula}. Data must be in long format and must not contain missing values.
 #' @param subject The column name of the subjects in the data. NOTE: Subjects within 
@@ -96,6 +97,10 @@ multRM <- function(formula, data, subject, within,
     stop("Resampling must be one of 'paramBS' and 'WildBS'!")
   }
   
+  if(!is.data.frame(data)){
+    data <- as.data.frame(data)
+  }
+  
   output <- list()
   
   test1 <- hasArg(CPU)
@@ -174,25 +179,34 @@ multRM <- function(formula, data, subject, within,
     stop("Something is wrong with the formula. Please specify all or no interactions in crossed designs.")
   }
   
+  # check that subjects are correctly labeled
+    if(nrow(data)/length(unique(subject)) != prod(fl[within])){
+      stop(paste0("The number of subjects (", length(unique(subject)), ") times the number of within-subject factor levels
+                  (", prod(fl[within]), ") does not equal the total number of observations (", nrow(data), "). 
+                  There are missing values in the data."))
+    }
+  
   if (nf == 1) {
     # one-way layout
     dat2 <- dat[order(dat[, 2]), ]
     dat2 <- dat2[order(dat2[, "subject"]), ]
-    fac.groups <- dat2[, 2]
+    #fac.groups <- dat2[, 2]
     hypo <- list(diag(fl) - matrix(1 / fl, ncol = fl, nrow = fl))
     Y <- list(dat2)
     lev.sub <- fl
     names(fl) <- within
     # end one-way layout ------------------------------------------------------
   } else {
-    dat2 <- dat[do.call(order, dat[, 2:(nf + 1)]), ]
-    dat2 <- dat2[order(dat2[, "subject"]), ]
-    fac.groups <- do.call(list, dat2[, 2:(nf+1)])
+    dat2 <- dat[do.call(order, dat[, c(2:(no.whole+1),      #order whole-plot factors
+                                       ncol(dat),           # order by subject
+                                       ((no.whole+2):(no.whole+2+no.subf-1)))]), ] # order sub-plot factors
+   # dat2 <- dat2[order(dat2[, "subject"]), ]
+    #fac.groups <- do.call(list, dat2[, 2:(nf+1)])
     lev_names <- lev_names[do.call(order, lev_names[, 1:nf]), ]
     if(length(whole) ==0){
       Y <- list(dat2)
     } else {
-       Y<- split(dat2, dat2[, whole])#, lex.order = TRUE)
+       Y<- split(dat2, dat2[, whole], lex.order = TRUE)
     }
   }
   nind <- sapply(Y, nrow)/lev.sub
@@ -264,7 +278,7 @@ multRM <- function(formula, data, subject, within,
   }
   mean_out <- matrix(round(results$Mean, dec), ncol = p, byrow = TRUE)
   Var_out <- results$Cov
-  descriptive <- cbind(unique(lev_names), nind, mean_out)
+  descriptive <- cbind(unique(lev_names), rep(nind, each =prod(fl[within])) , mean_out)
   colnames(descriptive) <- c(EF, "n", split3)
   rownames(descriptive) <- NULL
   colnames(WTS_out) <- cbind ("Test statistic", "df", "p-value")

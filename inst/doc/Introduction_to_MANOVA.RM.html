@@ -271,9 +271,9 @@ factor.</p>
 ## 1 1.48             1    6     P       1
 ## 2 2.81             1   12     P       1
 ## 3 3.56             1   18     P       1
-## 4 1.04             0    6     P       2
-## 5 2.07             0   12     P       2
-## 6 2.81             0   18     P       2
+## 4 1.04             0    6     P       1
+## 5 2.07             0   12     P       1
+## 6 2.81             0   18     P       1
 </code></pre>
 
 <p>We will now analyze this data using the <code>RM</code> function.
@@ -619,9 +619,9 @@ summary(fit)
 ## 
 ## p-values resampling:
 ##               paramBS (WTS) paramBS (MATS)
-## rate          &quot;0.004&quot;       &quot;&lt;0.001&quot;      
-## additive      &quot;0.032&quot;       &quot;0.033&quot;       
-## rate:additive &quot;0.306&quot;       &quot;0.267&quot;
+## rate          &quot;0.003&quot;       &quot;0.004&quot;       
+## additive      &quot;0.032&quot;       &quot;0.035&quot;       
+## rate:additive &quot;0.316&quot;       &quot;0.271&quot;
 </code></pre>
 
 <h3>Confidence regions</h3>
@@ -768,10 +768,14 @@ simCI(EEG_MANOVA, contrast = &quot;pairwise&quot;, type = &quot;Tukey&quot;)
 ## W SCC - W MCI    2.840  -3.719140  9.399140
 </code></pre>
 
-<pre><code class="r"># the same but with Dunnett contrasts using group 2 as baseline
-#simCI(EEG_MANOVA, contrast = &quot;pairwise&quot;, type = &quot;Dunnett&quot;, base = 2, interaction = FALSE, factor = &quot;diagnosis&quot;)
-# a one-way layout using MANOVA.wide():
-oneway &lt;- MANOVA.wide(cbind(brainrate_temporal, brainrate_central) ~ diagnosis, data = EEGwide,
+<p>Since the interaction hypothesis is not significant in the <code>EEG_MANOVA</code> example, it doesn&#39;t make sense to perform post-hoc tests on all interactions. Thus, we consider only the factor <code>diagnosis</code>:</p>
+
+<pre><code class="r">#simCI(EEG_MANOVA, contrast = &quot;pairwise&quot;, type = &quot;Tukey&quot;, interaction = FALSE, factor = &quot;diagnosis&quot;)
+</code></pre>
+
+<p>A one-way layout using MANOVA.wide():</p>
+
+<pre><code class="r">oneway &lt;- MANOVA.wide(cbind(brainrate_temporal, brainrate_central) ~ diagnosis, data = EEGwide,
                       iter = 1000, CPU = 1)
 # and a user-defined contrast matrix
 H &lt;- as.matrix(cbind(rep(1, 5), -1*Matrix::Diagonal(5)))
@@ -787,16 +791,16 @@ simCI(oneway, contrast = &quot;user-defined&quot;, contmat = H)
 ## 
 ##  #------Multivariate post-hoc comparisons: p-values -----# 
 ##  
-## [1] 1.000 0.720 0.701 0.013 0.010
+## [1] 1.000 0.687 0.668 0.007 0.006
 ## 
 ##  #-----------Confidence intervals for summary effects-------------# 
 ##  
 ##   Estimate     Lower      Upper
-## 1    0.013 -1.025882  1.0518818
-## 2   -0.243 -1.067879  0.5818789
-## 3   -0.251 -1.076162  0.5741618
-## 4   -1.033 -1.829751 -0.2362493
-## 5   -1.033 -1.808464 -0.2575362
+## 1    0.013 -1.027773  1.0537735
+## 2   -0.243 -1.069381  0.5833809
+## 3   -0.251 -1.077664  0.5756643
+## 4   -1.033 -1.831201 -0.2347986
+## 5   -1.033 -1.809876 -0.2561242
 </code></pre>
 
 <h4>Univariate comparisons</h4>
@@ -947,7 +951,8 @@ summary(fit2)
 
 <ul>
 <li><code>formula</code>: A model formula object. The left hand side contains the matrix of 
-response variables (using cbind()) and the right hand side contains the factor variables of interest.</li>
+response variables (using cbind()) and the right hand side contains the factor variables of interest.
+The within-subject factor(s) must be specified last in the formula, e.g. \code{cbind(outcome1, outcome2) ~ between1 * between2 * within1 * within2}.</li>
 <li><code>data</code>: A data.frame, list or environment containing the variables in <code>formula</code>. Data must be 
 in long format and must not contain missing values.</li>
 <li><code>subject</code>: The column name of the subjects in the data. NOTE: Subjects within 
@@ -992,10 +997,10 @@ summary(fit)
 ## Descriptive:
 ##   sex   region   n brainrate  complexity
 ## 1   M  central  59    -0.254      -0.302
-## 2   M  frontal 101    -0.335      -0.399
+## 2   M  frontal  59    -0.335      -0.399
 ## 3   M temporal  59    -0.294      -0.386
 ## 4   W  central 101     0.149       0.176
-## 5   W  frontal  59     0.195       0.233
+## 5   W  frontal 101     0.195       0.233
 ## 6   W temporal 101     0.172       0.226
 ## 
 ## Wald-Type Statistic (WTS):
@@ -1012,9 +1017,9 @@ summary(fit)
 ## 
 ## p-values resampling:
 ##            paramBS (WTS) paramBS (MATS)
-## sex        &quot;0.005&quot;       &quot;0.005&quot;       
-## region     &quot;0.995&quot;       &quot;0.985&quot;       
-## sex:region &quot;0.58&quot;        &quot;0.395&quot;
+## sex        &quot;&lt;0.001&quot;      &quot;&lt;0.001&quot;      
+## region     &quot;0.995&quot;       &quot;0.99&quot;        
+## sex:region &quot;0.625&quot;       &quot;0.455&quot;
 </code></pre>
 
 <p>The output is similar to that of <code>MANOVA()</code> described above.</p>

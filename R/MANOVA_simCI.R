@@ -34,6 +34,10 @@
 simCI <- function(object, contrast, contmat = NULL, type = NULL,
                   base = 1, interaction = TRUE, factor = NA, silent = FALSE, ...){
   
+  if(class(object) != "MANOVA"){
+    stop("simCI is currently only implemented for objects of class MANOVA.")
+  }
+  
   if(object$nested){
     stop("The pairwise comparisons cannot be used in nested designs!")
   }
@@ -49,7 +53,7 @@ simCI <- function(object, contrast, contmat = NULL, type = NULL,
     refit.formula <- as.formula(paste(form1, "~", factor))
     object <- object$modelcall(refit.formula, data = object$input$data, iter = object$input$iter, 
                                resampling = object$input$resampling, alpha = object$input$alpha,
-                               seed = object$input$seed, subject = object$input$subject, CPU = object$CPU)
+                               seed = object$input$seed, subject = object$input$subject)
     
   }
   
