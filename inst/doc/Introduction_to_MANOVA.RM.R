@@ -1,17 +1,17 @@
-## ------------------------------------------------------------------------
+## -----------------------------------------------------------------------------
 library(MANOVA.RM)
 data(o2cons)
 
-## ------------------------------------------------------------------------
+## -----------------------------------------------------------------------------
 head(o2cons)
 
-## ------------------------------------------------------------------------
+## -----------------------------------------------------------------------------
 model1 <- RM(O2 ~ Group * Staphylococci * Time, data = o2cons, 
              subject = "Subject", no.subf = 2, iter = 1000, 
              resampling = "Perm", seed = 1234)
 summary(model1)
 
-## ------------------------------------------------------------------------
+## -----------------------------------------------------------------------------
 data(EEG)
 EEG_model <- RM(resp ~ sex * diagnosis * feature * region, 
                 data = EEG, subject = "id", within = c("feature", "region"), 
@@ -19,19 +19,19 @@ EEG_model <- RM(resp ~ sex * diagnosis * feature * region,
                 iter = 1000,  alpha = 0.01, seed = 987)
 summary(EEG_model)
 
-## ------------------------------------------------------------------------
+## -----------------------------------------------------------------------------
 plot(EEG_model, factor = "sex", main = "Effect of sex on EEG values")
 plot(EEG_model, factor = "sex:diagnosis", legendpos = "topleft", col = c(4, 2))
 plot(EEG_model, factor = "sex:diagnosis:feature", legendpos = "center", gap = 0.05)
 
-## ------------------------------------------------------------------------
+## -----------------------------------------------------------------------------
 data(EEG)
 EEG_MANOVA <- MANOVA(resp ~ sex * diagnosis, 
                      data = EEG, subject = "id", resampling = "paramBS", 
                      iter = 1000,  alpha = 0.01, seed = 987)
 summary(EEG_MANOVA)
 
-## ------------------------------------------------------------------------
+## -----------------------------------------------------------------------------
 tear <- c(6.5, 6.2, 5.8, 6.5, 6.5, 6.9, 7.2, 6.9, 6.1, 6.3,
           6.7, 6.6, 7.2, 7.1, 6.8, 7.1, 7.0, 7.2, 7.5, 7.6)
 gloss <- c(9.5, 9.9, 9.6, 9.6, 9.2, 9.1, 10.0, 9.9, 9.5, 9.4,
@@ -45,7 +45,7 @@ example <- data.frame(tear, gloss, opacity, rate, additive)
 fit <- MANOVA.wide(cbind(tear, gloss, opacity) ~ rate * additive, data = example, iter = 1000)
 summary(fit)
 
-## ------------------------------------------------------------------------
+## -----------------------------------------------------------------------------
 if (requireNamespace("HSAUR3", quietly = TRUE)) {
 library(HSAUR3)
 data(water)
@@ -55,29 +55,29 @@ cr <- conf.reg(test)
 cr
 }
 
-## ------------------------------------------------------------------------
+## -----------------------------------------------------------------------------
 plot(cr, col = 2, lty = 2, xlab = "Difference in mortality", ylab ="Difference in water hardness")
 
-## ------------------------------------------------------------------------
+## -----------------------------------------------------------------------------
 # pairwise comparison using Tukey contrasts
 simCI(EEG_MANOVA, contrast = "pairwise", type = "Tukey")
 
-## ------------------------------------------------------------------------
+## -----------------------------------------------------------------------------
 #simCI(EEG_MANOVA, contrast = "pairwise", type = "Tukey", interaction = FALSE, factor = "diagnosis")
 
-## ------------------------------------------------------------------------
+## -----------------------------------------------------------------------------
 oneway <- MANOVA.wide(cbind(brainrate_temporal, brainrate_central) ~ diagnosis, data = EEGwide, iter = 1000)
 # and a user-defined contrast matrix
 H <- as.matrix(cbind(rep(1, 5), -1*Matrix::Diagonal(5)))
 # user-specified comparison
 simCI(oneway, contrast = "user-defined", contmat = H)
 
-## ------------------------------------------------------------------------
+## -----------------------------------------------------------------------------
 model_sex <- MANOVA.wide(cbind(brainrate_temporal, brainrate_central, brainrate_frontal,
                             complexity_temporal, complexity_central, complexity_frontal) ~ sex, data = EEGwide, iter = 1000, seed = 987)
 summary(model_sex)
 
-## ------------------------------------------------------------------------
+## -----------------------------------------------------------------------------
 EEG1 <- MANOVA.wide(brainrate_temporal ~ sex, data = EEGwide, iter = 1000, seed = 987)
 EEG2 <- MANOVA.wide(brainrate_central ~ sex, data = EEGwide, iter = 1000, seed = 987)
 EEG3 <- MANOVA.wide(brainrate_frontal ~ sex, data = EEGwide, iter = 1000, seed = 987)
@@ -85,12 +85,12 @@ EEG4 <- MANOVA.wide(complexity_temporal ~ sex, data = EEGwide, iter = 1000, seed
 EEG5 <- MANOVA.wide(complexity_central ~ sex, data = EEGwide, iter = 1000, seed = 987)
 EEG6 <- MANOVA.wide(complexity_frontal ~ sex, data = EEGwide, iter = 1000, seed = 987)
 
-## ------------------------------------------------------------------------
+## -----------------------------------------------------------------------------
 p.adjust(c(EEG1$resampling[, 2], EEG2$resampling[, 2], EEG3$resampling[, 2],
            EEG4$resampling[, 2], EEG5$resampling[, 2], EEG6$resampling[, 2]),
          method = "bonferroni")
 
-## ------------------------------------------------------------------------
+## -----------------------------------------------------------------------------
 if (requireNamespace("GFD", quietly = TRUE)) {
 library(GFD)
 data(curdies)
@@ -113,14 +113,14 @@ summary(fit1)
 summary(fit2)
 }
 
-## ------------------------------------------------------------------------
+## -----------------------------------------------------------------------------
 library(tidyr)
 eeg <- spread(EEG, feature, resp)
 head(eeg)
 fit <- multRM(cbind(brainrate, complexity) ~ sex * region, data = eeg, subject = "id", within = "region", iter = 1000)
 summary(fit)
 
-## ------------------------------------------------------------------------
+## -----------------------------------------------------------------------------
 if (requireNamespace("RGtk2", quietly = TRUE)) {
 GUI.MANOVA()
 }

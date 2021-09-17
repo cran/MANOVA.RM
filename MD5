@@ -1,4 +1,4 @@
-c388ba86b1e95daad940fdb282a9cdd3 *DESCRIPTION
+826e236b9e98d305172e26e47cc63db7 *DESCRIPTION
 6c0f776f027d9019cdca6f3594e30219 *NAMESPACE
 865d65231bb830c2de0ec33587eeaaab *R/Data.R
 7dcc3d62505884f270efbb1d8bc56517 *R/GUI.R
@@ -26,9 +26,9 @@ b39bffaf4882f0a6ef70c78ae58e5ad4 *data/EEG.rda
 f571dbdd47264b7c325d0698a689c200 *data/EEGwide.rda
 5c4080e3ca17ed2249c7c5dbae989f90 *data/o2cons.rda
 e540c44707ed9e62ea19bd55679f0ff1 *inst/NEWS.md
-2acefa1f9d5066f85bb81a38333fba1f *inst/doc/Introduction_to_MANOVA.RM.R
+1785315b61bf63b06d598aa6cfd6606e *inst/doc/Introduction_to_MANOVA.RM.R
 8de7159a697e95205e092348402d14c1 *inst/doc/Introduction_to_MANOVA.RM.Rmd
-5a5244d4f8711b90425faf533a44ea51 *inst/doc/Introduction_to_MANOVA.RM.html
+cdc510008004acede1c9e57dfdc598b1 *inst/doc/Introduction_to_MANOVA.RM.html
 fb4b0741f00777d07bbba0b065e041ec *man/EEG.Rd
 8da159efafb3fa5f26e3a48f4c43e38c *man/EEGwide.Rd
 be655f773afc9ece7f3f71866d366398 *man/GUI.MANOVA.Rd
@@ -54,3 +54,4 @@ b9148f7bda521019e54fd74672a8387f *tests/testthat/test_RM.R
 8250fc5ed52f410b916c4f22e3f4a55c *tests/testthat/test_multRM.R
 6020013c9a77034a3b98d65fd1133074 *tests/testthat/test_simCI.R
 8de7159a697e95205e092348402d14c1 *vignettes/Introduction_to_MANOVA.RM.Rmd
+d851c52138a33e25d91f17164910ae9b *vignettes/Introduction_to_MANOVA.RM.md
