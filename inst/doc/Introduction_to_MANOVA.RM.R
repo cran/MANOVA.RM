@@ -20,9 +20,12 @@ EEG_model <- RM(resp ~ sex * diagnosis * feature * region,
 summary(EEG_model)
 
 ## -----------------------------------------------------------------------------
-plot(EEG_model, factor = "sex", main = "Effect of sex on EEG values")
-plot(EEG_model, factor = "sex:diagnosis", legendpos = "topleft", col = c(4, 2))
-plot(EEG_model, factor = "sex:diagnosis:feature", legendpos = "center", gap = 0.05)
+plot(model1, leg = FALSE)
+
+## -----------------------------------------------------------------------------
+EEGnew <- EEG[EEG$region == "temporal", ]
+EEG_model2 <- RM(resp ~ sex*feature, within = "feature", no.subf = 1, subject = "id", data = EEGnew)
+plot(EEG_model2, legendpos = "topleft", col = c(4, 2))
 
 ## -----------------------------------------------------------------------------
 data(EEG)
@@ -53,10 +56,8 @@ test <- MANOVA.wide(cbind(mortality, hardness) ~ location, data = water, iter = 
 summary(test)
 cr <- conf.reg(test)
 cr
-}
-
-## -----------------------------------------------------------------------------
 plot(cr, col = 2, lty = 2, xlab = "Difference in mortality", ylab ="Difference in water hardness")
+}
 
 ## -----------------------------------------------------------------------------
 # pairwise comparison using Tukey contrasts
@@ -114,11 +115,13 @@ summary(fit2)
 }
 
 ## -----------------------------------------------------------------------------
+if (requireNamespace("tidyr", quietly = TRUE)) {
 library(tidyr)
 eeg <- spread(EEG, feature, resp)
 head(eeg)
 fit <- multRM(cbind(brainrate, complexity) ~ sex * region, data = eeg, subject = "id", within = "region", iter = 1000)
 summary(fit)
+}
 
 ## -----------------------------------------------------------------------------
 if (requireNamespace("RGtk2", quietly = TRUE)) {

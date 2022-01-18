@@ -120,18 +120,20 @@ We find significant effects at level $\alpha = 0.01$ of the between-subject fact
 
 ### Plotting
 
-The `RM()` function is equipped with a plotting option, displaying the calculated means along with $(1-\alpha)$ confidence intervals based on a $t$-approximation.
-The `plot` function takes an `RM` object as an argument. In addition, the factor of interest may be specified. If this argument is 
-omitted in a two- or higher-way layout, the user is asked to specify the factor for plotting. Furthermore, additional graphical parameters
-can be used to customize the plots. The optional argument `legendpos` specifies the position of the legend in higher-way layouts, while the argument `gap` (default 0.1) specifies the distance between the error bars.
+The `RM()` function is equipped with a plotting option, displaying the calculated means along with the $(1-\alpha)$ confidence intervals.
+The `plot` function takes an `RM` object as an argument. Furthermore, additional graphical parameters can be used to customize the plots. The optional argument `legendpos` specifies the position of the legend in higher-way layouts, while the argument `gap` (default 0.1) specifies the distance between the error bars.
 
 ```{r}
-plot(EEG_model, factor = "sex", main = "Effect of sex on EEG values")
-plot(EEG_model, factor = "sex:diagnosis", legendpos = "topleft", col = c(4, 2))
-plot(EEG_model, factor = "sex:diagnosis:feature", legendpos = "center", gap = 0.05)
+plot(model1, leg = FALSE)
 ```
 
+For illustration purposes, we reduce the EEG-model above to a two-way design:
 
+```{r}
+EEGnew <- EEG[EEG$region == "temporal", ]
+EEG_model2 <- RM(resp ~ sex*feature, within = "feature", no.subf = 1, subject = "id", data = EEGnew)
+plot(EEG_model2, legendpos = "topleft", col = c(4, 2))
+```
 
 ## The `MANOVA` function
 
@@ -215,15 +217,12 @@ test <- MANOVA.wide(cbind(mortality, hardness) ~ location, data = water, iter = 
 summary(test)
 cr <- conf.reg(test)
 cr
+plot(cr, col = 2, lty = 2, xlab = "Difference in mortality", ylab ="Difference in water hardness")
 }
 ```
 
 The output consists of the necessary parameters specifying the ellipsoid: the center, the eigenvectors which determine the axes of the ellipsoid as well as the scaling factors for the eigenvectors, which are calculated based on the eigenvalues, the bootstrap quantile and the total sample size. For more information on the construction of the confidence ellipses see Friedrich and Pauly (2018). 
 For observations with two dimensions, the confidence ellipse can be plotted using the generic `plot` function. The usual plotting parameters can be used to customize the plots.
-
-```{r}
-plot(cr, col = 2, lty = 2, xlab = "Difference in mortality", ylab ="Difference in water hardness")
-```
 
 ### Post-hoc comparisons
 
@@ -251,11 +250,12 @@ As an example, we consider the `EEG_MANOVA` example from above:
 simCI(EEG_MANOVA, contrast = "pairwise", type = "Tukey")
 ```
 
-Since the interaction hypothesis is not significant in the `EEG_MANOVA` example, it doesn't make sense to perform post-hoc tests on all interactions. Thus, we consider only the factor `diagnosis`:
+<!--Since the interaction hypothesis is not significant in the `EEG_MANOVA` example, it doesn't make sense to perform post-hoc tests on all interactions. Thus, we consider only the factor `diagnosis`:
 
 ```{r}
 #simCI(EEG_MANOVA, contrast = "pairwise", type = "Tukey", interaction = FALSE, factor = "diagnosis")
 ```
+-->
 
 A one-way layout using MANOVA.wide():
 ```{r}
@@ -349,11 +349,13 @@ different groups of between-subject factors must have individual labels.
 As an example, we again use the EEG dataset. This time, imagine we have two outcomes (brainrate and complexity) measured for each of the three regions (within-subject factor). We additionally consider the between-subject factor sex. The `tidyr` package can be used to transform our original data to this format.
 
 ```{r}
+if (requireNamespace("tidyr", quietly = TRUE)) {
 library(tidyr)
 eeg <- spread(EEG, feature, resp)
 head(eeg)
 fit <- multRM(cbind(brainrate, complexity) ~ sex * region, data = eeg, subject = "id", within = "region", iter = 1000)
 summary(fit)
+}
 ```
 
 The output is similar to that of `MANOVA()` described above.
@@ -378,9 +380,8 @@ data frame and the resampling method.
 Additionally, one can specify whether or not headers are
 included in the data file, and which separator (e.g., ',' for *.csv files) and character symbols are used for decimals
 in the data file. 
-The GUI for `RM` also provides a plotting option, which generates a new window
-for specifying the factors to be plotted (in higher-way layouts) along with a few plotting
-parameters.
+<!-- The GUI for `RM` also provides a plotting option, which generates a new window for specifying the factors to be plotted (in higher-way layouts) along with a few plotting
+parameters. -->
 For the `multRM()` function there is no GUI available yet.
 
 ## References

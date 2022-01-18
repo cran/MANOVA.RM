@@ -2,8 +2,8 @@ Package: MANOVA.RM
 Type: Package
 Title: Resampling-Based Analysis of Multivariate Data and Repeated
         Measures Designs
-Version: 0.5.2
-Date: 2021-09-14
+Version: 0.5.3
+Date: 2022-01-18
 Author: Sarah Friedrich, Frank Konietschke, Markus Pauly
 Maintainer: Sarah Friedrich <sarah.friedrich@math.uni-augsburg.de>
 Depends: R (>= 3.4.0)
@@ -23,11 +23,11 @@ LazyData: TRUE
 Suggests: RGtk2 (>= 2.20.31), knitr, rmarkdown, HSAUR3, tidyr(>=
         1.0.0), ggplot2, GFD, testthat
 Encoding: UTF-8
-RoxygenNote: 6.1.1
+RoxygenNote: 7.1.2
 VignetteBuilder: knitr, rmarkdown
 URL: https://github.com/smn74/MANOVA.RM
 BugReports: https://github.com/smn74/MANOVA.RM/issues
 NeedsCompilation: no
-Packaged: 2021-09-17 13:28:33 UTC; sarah
+Packaged: 2022-01-18 10:21:25 UTC; sfriedrich
 Repository: CRAN
-Date/Publication: 2021-09-17 15:30:15 UTC
+Date/Publication: 2022-01-18 16:12:45 UTC
