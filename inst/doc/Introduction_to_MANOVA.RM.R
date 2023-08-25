@@ -124,7 +124,7 @@ summary(fit)
 }
 
 ## -----------------------------------------------------------------------------
-if (requireNamespace("RGtk2", quietly = TRUE)) {
-GUI.MANOVA()
-}
+#if (requireNamespace("RGtk2", quietly = TRUE)) {
+#GUI.MANOVA()
+#}
 

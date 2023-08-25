@@ -64,7 +64,7 @@ head(o2cons)
 We will now analyze this data using the `RM` function.
 The `RM` function takes as arguments:
 
-* `formula`: A formula consisting of the outcome variable on the left hand side of a \~ operator and the factor variables of interest on the right hand side. The within-subject factor(s) must be specified last in the formula, e.g. \code{cbind(outcome1, outcome2) ~ between1 * between2 * within1 * within2}.
+* `formula`: A formula consisting of the outcome variable on the left hand side of a \~ operator and the factor variables of interest on the right hand side. The within-subject factor(s) must be specified last in the formula, e.g. `cbind(outcome1, outcome2) ~ between1 * between2 * within1 * within2`.
 * `data`: A data.frame containing the variables in `formula`.
 * `subject`: The column name of the subjects variable in the data frame.
 * `no.subf`: The number of within-subject factors, default is 1. Alternatively, the 
@@ -328,7 +328,7 @@ The `multRM()` function provides a combination of the approaches described above
 
 * `formula`: A model formula object. The left hand side contains the matrix of 
 response variables (using cbind()) and the right hand side contains the factor variables of interest.
-The within-subject factor(s) must be specified last in the formula, e.g. \code{cbind(outcome1, outcome2) ~ between1 * between2 * within1 * within2}.
+The within-subject factor(s) must be specified last in the formula, e.g. `cbind(outcome1, outcome2) ~ between1 * between2 * within1 * within2`.
 * `data`: A data.frame, list or environment containing the variables in `formula`. Data must be 
 in long format and must not contain missing values.
 * `subject`: The column name of the subjects in the data. NOTE: Subjects within 
@@ -360,16 +360,16 @@ summary(fit)
 
 The output is similar to that of `MANOVA()` described above.
 
-
+<!--
 ## optional GUI
 
 The `MANOVA.RM` package is equipped with an optional graphical user interface, which is based on `RGtk2`. The GUI may be started in `R` (if `RGtk2` is installed) using the
 command `GUI.RM()` and `GUI.MANOVA()` or `GUI.MANOVAwide()` for repeated measures designs and multivariate data, respectively. 
 
 ```{r}
-if (requireNamespace("RGtk2", quietly = TRUE)) {
-GUI.MANOVA()
-}
+#if (requireNamespace("RGtk2", quietly = TRUE)) {
+#GUI.MANOVA()
+#}
 ```
 
 The user can specify the data location
@@ -380,9 +380,10 @@ data frame and the resampling method.
 Additionally, one can specify whether or not headers are
 included in the data file, and which separator (e.g., ',' for *.csv files) and character symbols are used for decimals
 in the data file. 
-<!-- The GUI for `RM` also provides a plotting option, which generates a new window for specifying the factors to be plotted (in higher-way layouts) along with a few plotting
-parameters. -->
+The GUI for `RM` also provides a plotting option, which generates a new window for specifying the factors to be plotted (in higher-way layouts) along with a few plotting
+parameters.
 For the `multRM()` function there is no GUI available yet.
+-->
 
 ## References
 

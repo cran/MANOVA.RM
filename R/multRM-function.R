@@ -181,6 +181,7 @@ multRM <- function(formula, data, subject, within,
   output$other <- list(no.subf = no.subf, no.whole = no.whole, p = p, within = within)
   output$nested <- FALSE
   output$modelcall <- multRM
+  output$modeltype <- "multRM"
   
   # check for singular covariance matrix
   test <- try(solve(output$Covariance), silent = TRUE)

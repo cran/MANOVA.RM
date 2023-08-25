@@ -29,13 +29,17 @@
 #' @seealso \code{\link[multcomp]{contrMat}}
 #' 
 #' @importFrom multcomp contrMat
-#'
+#' @importFrom methods is
 #' @export
 simCI <- function(object, contrast, contmat = NULL, type = NULL,
                   base = 1, interaction = TRUE, factor = NA, silent = FALSE, ...){
   
-  if(class(object) != "MANOVA"){
+  if(!is(object, "MANOVA")){
     stop("simCI is currently only implemented for objects of class MANOVA.")
+  }
+  
+  if(object$modeltype == "multRM"){
+    stop("simCI is not yet implemented for repeated measures.")
   }
   
   if(object$nested){
