@@ -64,10 +64,10 @@ head(o2cons)
 We will now analyze this data using the `RM` function.
 The `RM` function takes as arguments:
 
-* `formula`: A formula consisting of the outcome variable on the left hand side of a \~ operator and the factor variables of interest on the right hand side. The within-subject factor(s) must be specified last in the formula, e.g. `cbind(outcome1, outcome2) ~ between1 * between2 * within1 * within2`.
+* `formula`: A formula consisting of the outcome variable on the left hand side of a \~ operator and the factor variables of interest on the right hand side. The within-subject factor(s) must be specified last in the formula, e.g. `outcome ~ between1 * between2 * within1 * within2`.
 * `data`: A data.frame containing the variables in `formula`.
 * `subject`: The column name of the subjects variable in the data frame.
-* `no.subf`: The number of within-subject factors, default is 1. Alternatively, the 
+* `no.subf`: The number of within-subject factors, default is 1. Alternatively, the
 within-subjects factors can be directly specified using `within`.
 * `iter`: The number of iterations for the resampling approach. Default value is 10,000.
 * `alpha`: The significance level, default is 0.05.
@@ -385,6 +385,12 @@ parameters.
 For the `multRM()` function there is no GUI available yet.
 -->
 
+## Which resampling approach should I choose?
+
+The `MANOVA.RM` package provides different resampling approaches, which in some cases might lead to different conclusions. So the question is: for a given research question, which resampling approach is most appropriate? Some results from the literature giving guidance on this issue are summarized below:
+
+* Geroldinger et al. (2026) conducted a neutral comparison study on approaches for analyzing multivariate data, including the approaches implemented in MANOVA.RM. They found the parametric bootstrap approach for the MATS to combine appropriate type-I error control with competitive power across a range of scenarios.
+
 ## References
 
 * Bathke, A. et al. (2018).
@@ -405,3 +411,5 @@ For the `multRM()` function there is no GUI available yet.
 * Konietschke, F., Bathke, A. C., Harrar, S. W. and Pauly, M. (2015). 
   Parametric and nonparametric bootstrap methods for general MANOVA. Journal 
   of Multivariate Analysis, 140, 291-301.  
+  
+* Geroldinger, M., Laimer, M., Wally, V., Bauer, J.W., and Zimmermann, G. (2026). A neutral comparison of multivariate hypothesis tests for parallel group designs in rare disease settings. Statistics in Medicine.
